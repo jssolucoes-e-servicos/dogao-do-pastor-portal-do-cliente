@@ -1,110 +1,110 @@
-import { useState } from 'react';
+'use client';
+
+import {
+  PreOrderItemState
+} from '@/components/pre-sale/index';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { PreOrderItemState } from '@/components/pre-sale';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { _INGREDIENTS } from '@/constants';
+import { useState } from 'react';
+
+interface HotDogCustomizerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (removedIngredients: string[]) => void;
+}
+
+const HotDogCustomizer = ({ isOpen, onClose, onSave }: HotDogCustomizerProps) => {
+  const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
+
+  const handleCheckboxChange = (ingredient: string) => {
+    setRemovedIngredients(prev =>
+      prev.includes(ingredient)
+        ? prev.filter(item => item !== ingredient)
+        : [...prev, ingredient]
+    );
+  };
+
+  const handleSave = () => {
+    onSave(removedIngredients);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Personalizar Dogão</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <p>Selecione os ingredientes que você deseja **remover**:</p>
+          {_INGREDIENTS.map(ingredient => (
+            <div key={ingredient} className="flex items-center space-x-2">
+              <Checkbox
+                id={ingredient}
+                checked={removedIngredients.includes(ingredient)}
+                onCheckedChange={() => handleCheckboxChange(ingredient)}
+              />
+              <Label htmlFor={ingredient}>{ingredient}</Label>
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSave} className="bg-orange-600 hover:bg-orange-700">
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 interface OrderDetailsStepProps {
   orderItems: PreOrderItemState[];
-  setOrderItems: React.Dispatch<React.SetStateAction<PreOrderItemState[]>>;
+  setOrderItems: (items: PreOrderItemState[]) => void;
   total: number;
   onNext: () => void;
   onPrevious: () => void;
 }
 
-const ALL_INGREDIENTS = ['Queijo', 'Batata Palha', 'Maionese', 'Milho', 'Ervilha', 'Tomate', 'Cebola'];
-
-// Componente interno para a personalização
-const HotDogCustomizer = ({ initialRemovedIngredients, onIngredientsChange }) => {
-  const [removedIngredients, setRemovedIngredients] = useState(initialRemovedIngredients);
-
-  const handleToggleIngredient = (ingredient: string) => {
-    const isRemoved = removedIngredients.includes(ingredient);
-    let newRemovedList: string[];
-    if (isRemoved) {
-      newRemovedList = removedIngredients.filter(item => item !== ingredient);
-    } else {
-      newRemovedList = [...removedIngredients, ingredient];
-    }
-    setRemovedIngredients(newRemovedList);
-    onIngredientsChange(newRemovedList);
-  };
-
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {ALL_INGREDIENTS.map(ingredient => {
-        const isRemoved = removedIngredients.includes(ingredient);
-        return (
-          <Button
-            key={ingredient}
-            type="button"
-            onClick={() => handleToggleIngredient(ingredient)}
-            variant="outline"
-            className={`text-sm transition-colors ${isRemoved ? 'bg-red-100 text-red-800 border-red-300' : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200'}`}
-          >
-            {isRemoved ? 'Sem ' : ''}{ingredient}
-          </Button>
-        );
-      })}
-    </div>
-  );
-};
-
-const OrderDetailsStep: React.FC<OrderDetailsStepProps> = ({
+export default function OrderDetailsStep({
   orderItems,
   setOrderItems,
   total,
   onNext,
   onPrevious,
-}) => {
+}: OrderDetailsStepProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItemId, setEditingItemId] = useState<number | null>(null);
-  const [tempIngredients, setTempIngredients] = useState<string[]>([]);
 
-  const addOrUpdateHotDog = () => {
-    if (editingItemId !== null) {
-      setOrderItems(prevItems =>
-        prevItems.map(item =>
-          item.id === editingItemId ? { ...item, removedIngredients: tempIngredients } : item
-        )
-      );
-    } else {
-      setOrderItems(prevItems => [
-        ...prevItems,
-        { id: Date.now(), removedIngredients: tempIngredients },
-      ]);
-    }
-    closeModal();
-  };
-
-  const removeHotDog = (idToRemove: number) => {
-    setOrderItems(prevItems => prevItems.filter(item => item.id !== idToRemove));
-  };
-
-  const openModal = (itemId: number | null = null) => {
-    setEditingItemId(itemId);
-    const initialIngredients = itemId !== null ? (orderItems.find(item => item.id === itemId)?.removedIngredients || []) : [];
-    setTempIngredients(initialIngredients);
+  const handleAddHotDog = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingItemId(null);
-    setTempIngredients([]);
+  const handleSaveCustomization = (removedIngredients: string[]) => {
+    const newId = orderItems.length > 0 ? Math.max(...orderItems.map(item => item.id)) + 1 : 1;
+    setOrderItems(prev => [...prev, { id: newId, removedIngredients }]);
   };
 
-  const handleNext = () => {
-    if (orderItems.length === 0) {
-      console.error('Por favor, adicione pelo menos um Dogão ao seu pedido.');
-      return;
-    }
-    onNext();
+  const handleRemoveItem = (id: number) => {
+    setOrderItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const formatPrice = (price: number) => {
+    return `R$ ${price.toFixed(2).replace('.', ',')}`;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold">Seu Pedido</h3>
+        <h3 className="text-xl font-bold">Dogão(s) no seu Pedido</h3>
         <Button variant="ghost" onClick={onPrevious}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -114,63 +114,53 @@ const OrderDetailsStep: React.FC<OrderDetailsStepProps> = ({
       </div>
 
       <div className="space-y-4">
-        {orderItems.map((item, index) => (
-          <div key={item.id} className="p-4 border rounded-lg shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="font-semibold text-lg">Dogão #{index + 1}</h4>
-              <div className="space-x-2">
-                <Button variant="link" onClick={() => openModal(item.id)}>Editar</Button>
-                <Button variant="link" onClick={() => removeHotDog(item.id)} className="text-red-500 hover:text-red-700">Remover</Button>
+        {orderItems.length === 0 ? (
+          <p className="text-center text-gray-500">Seu carrinho está vazio.</p>
+        ) : (
+          orderItems.map((item, index) => (
+            <div key={item.id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-inner">
+              <div className="flex-1">
+                <p className="font-semibold">Dogão #{index + 1}</p>
+                {item.removedIngredients.length > 0 && (
+                  <p className="text-sm text-gray-600">
+                    Sem: {item.removedIngredients.join(', ')}
+                  </p>
+                )}
               </div>
+              <Button variant="ghost" onClick={() => handleRemoveItem(item.id)}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-red-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.36L16.5 4.5m-1.74-1.74L16.5 4.5m-7.5 7.5V6a3.75 3.75 0 0 0-7.5 0v3.75M9 12h6" />
+                </svg>
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-              {item.removedIngredients.length > 0 ? (
-                item.removedIngredients.map((ing, i) => (
-                  <span key={i} className="bg-red-200 text-red-800 rounded-full px-2 py-1">Sem {ing}</span>
-                ))
-              ) : (
-                <span>Dogão completo!</span>
-              )}
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
-      <p className="text-lg font-bold text-center mt-6">Total: R$ {total.toFixed(2).replace('.', ',')}</p>
+
       <Button
-        type="button"
-        onClick={() => openModal()}
-        variant="secondary"
-        className="w-full"
-      >
-        Adicionar outro Dogão
-      </Button>
-      <Button
-        type="button"
-        onClick={handleNext}
+        onClick={handleAddHotDog}
         className="w-full bg-orange-600 hover:bg-orange-700"
       >
-        Avançar
+        {orderItems.length > 0 ? 'Adicionar outro Dogão' : 'Adicionar Dogão'}
       </Button>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Personalizar Dogão</DialogTitle>
-          </DialogHeader>
-          <div className="p-4">
-            <p className="text-sm text-center mb-6">Clique nos ingredientes para remover</p>
-            <HotDogCustomizer initialRemovedIngredients={tempIngredients} onIngredientsChange={setTempIngredients} />
-          </div>
-          <Button
-            onClick={addOrUpdateHotDog}
-            className="w-full bg-orange-600 hover:bg-orange-700"
-          >
-            {editingItemId !== null ? 'Salvar Edição' : 'Adicionar ao Pedido'}
-          </Button>
-        </DialogContent>
-      </Dialog>
+      <HotDogCustomizer
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveCustomization}
+      />
+
+      <div className="text-right font-bold text-lg">
+        Total: {formatPrice(total)}
+      </div>
+
+      <Button
+        onClick={onNext}
+        className="w-full bg-green-600 hover:bg-green-700"
+        disabled={orderItems.length === 0}
+      >
+        Continuar para o Endereço
+      </Button>
     </div>
   );
-};
-
-export default OrderDetailsStep;
+}
