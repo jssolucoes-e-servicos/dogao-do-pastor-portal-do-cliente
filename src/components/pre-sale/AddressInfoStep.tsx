@@ -1,0 +1,227 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  AddressData,
+  FetchedCustomerData,
+} from '@/components/pre-sale-form';
+
+interface AddressInfoStepProps {
+  customerData: FetchedCustomerData | null;
+  deliveryAddress: AddressData | null;
+  selectedAddressId: string;
+  setSelectedAddressId: (id: string) => void;
+  setDeliveryAddress: (address: AddressData | null) => void;
+  onPrevious: () => void;
+}
+
+const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (address: AddressData) => void; initialData?: AddressData | null }) => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState<AddressData>(initialData || {
+    street: '',
+    number: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    complement: '',
+  });
+  const [addressSearch, setAddressSearch] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const newFormData = { ...formData, [name]: value };
+    setFormData(newFormData);
+    onAddressChange(newFormData);
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addressSearch) {
+      toast({
+        title: 'Campo Vazio',
+        description: 'Por favor, digite um endereço para buscar.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      // Esta chamada deve ser para uma rota de API do seu backend Next.js que, por sua vez,
+      // fará a chamada para a API do Google Places para proteger sua chave de API.
+      const response = await fetch('/api/google-places', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addressQuery: addressSearch }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.results && data.results.length > 0) {
+        // Assume que a API de proxy do Google Places retornou um array de endereços
+        // Preenche o formulário com o primeiro resultado
+        const foundAddress = data.results[0];
+        setFormData(foundAddress);
+        onAddressChange(foundAddress);
+        toast({
+          title: 'Endereço encontrado!',
+          description: 'Os campos foram preenchidos automaticamente.'
+        });
+      } else {
+        toast({
+          title: 'Endereço não encontrado',
+          description: 'Não encontramos o endereço. Tente novamente.',
+          variant: 'destructive'
+        });
+      }
+
+    } catch (error) {
+      console.error('Erro na busca do endereço:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao buscar o endereço. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <form onSubmit={handleSearch} className="flex gap-2">
+        <Input
+          type="text"
+          placeholder="Pesquisar endereço no Google Places..."
+          value={addressSearch}
+          onChange={(e) => setAddressSearch(e.target.value)}
+          className="flex-1"
+          disabled={isSearching}
+        />
+        <Button type="submit" disabled={isSearching}>
+          {isSearching ? 'Buscando...' : 'Buscar'}
+        </Button>
+      </form>
+      <div>
+        <Label htmlFor="street">Rua</Label>
+        <Input type="text" name="street" value={formData.street} onChange={handleInputChange} required />
+      </div>
+      <div>
+        <Label htmlFor="number">Número</Label>
+        <Input type="text" name="number" value={formData.number} onChange={handleInputChange} required />
+      </div>
+      <div>
+        <Label htmlFor="neighborhood">Bairro</Label>
+        <Input type="text" name="neighborhood" value={formData.neighborhood || ''} onChange={handleInputChange} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="city">Cidade</Label>
+          <Input type="text" name="city" value={formData.city} onChange={handleInputChange} required />
+        </div>
+        <div>
+          <Label htmlFor="state">Estado</Label>
+          <Input type="text" name="state" value={formData.state} onChange={handleInputChange} required />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="zipCode">CEP</Label>
+        <Input type="text" name="zipCode" value={formData.zipCode || ''} onChange={handleInputChange} />
+      </div>
+      <div>
+        <Label htmlFor="complement">Complemento (Opcional)</Label>
+        <Input type="text" name="complement" value={formData.complement || ''} onChange={handleInputChange} />
+      </div>
+    </div>
+  );
+};
+
+
+export default function AddressInfoStep({
+  customerData,
+  deliveryAddress,
+  selectedAddressId,
+  setSelectedAddressId,
+  setDeliveryAddress,
+  onPrevious,
+}: AddressInfoStepProps) {
+  const handleAddressSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedAddressId(selectedId);
+    if (selectedId === 'new') {
+      setDeliveryAddress(null);
+    } else {
+      const selectedAddress = customerData?.addresses?.find(addr => addr.id === selectedId);
+      if (selectedAddress) {
+        setDeliveryAddress(selectedAddress);
+      }
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (deliveryAddress) {
+      console.log('Pedido finalizado com sucesso!');
+      console.log('Endereço de entrega:', deliveryAddress);
+    } else {
+      console.error('Por favor, preencha o endereço de entrega.');
+    }
+  };
+
+  return (
+    <form onSubmit={handleFormSubmit} className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-bold">Endereço de Entrega</h3>
+        <Button variant="ghost" onClick={onPrevious}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+          Voltar
+        </Button>
+      </div>
+
+      {customerData?.addresses && customerData.addresses.length > 0 ? (
+        <div>
+          <Label htmlFor="addressSelect">Selecione um Endereço Salvo</Label>
+          <select
+            id="addressSelect"
+            value={selectedAddressId}
+            onChange={handleAddressSelectionChange}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600"
+          >
+            <option value="">Selecione...</option>
+            {customerData.addresses.map(addr => (
+              <option key={addr.id} value={addr.id}>
+                {`${addr.street}, ${addr.number} - ${addr.city}`}
+              </option>
+            ))}
+            <option value="new">Adicionar Novo Endereço</option>
+          </select>
+        </div>
+      ) : (
+        <p className="text-gray-600">Por favor, adicione um endereço para a entrega.</p>
+      )}
+
+      {(selectedAddressId === 'new' || (customerData?.addresses?.length === 0 && selectedAddressId === '')) && (
+        <div className="mt-4">
+          <AddressForm onAddressChange={(addr) => setDeliveryAddress(addr)} initialData={deliveryAddress} />
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        className="w-full bg-orange-600 hover:bg-orange-700"
+        disabled={!deliveryAddress}
+      >
+        Finalizar Pedido
+      </Button>
+    </form>
+  );
+}

@@ -1,0 +1,1 @@
+export const _EDITION_ID: string = process.env.EDITION_ID!;

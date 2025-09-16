@@ -1,0 +1,13 @@
+export const _INGREDIENTS = [
+  'Batata Palha',
+  'Catchup',
+  'Ervilha',
+  'Maionese',
+  'Milho',
+  'Molho Vermelho',
+  'Molho 4 queijos',
+  'Mostarda',
+  'Pão',
+  'Queijo Ralado',
+  'Salsicha',
+];
