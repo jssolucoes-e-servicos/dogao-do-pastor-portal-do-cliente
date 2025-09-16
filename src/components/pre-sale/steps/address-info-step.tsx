@@ -7,11 +7,37 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import React, { useEffect, useRef, useState } from 'react';
 
+interface GeocoderAddressComponent {
+  long_name: string;
+  short_name: string;
+  types: string[];
+}
+
+interface PlaceResult {
+  address_components: GeocoderAddressComponent[];
+}
+
+interface AutocompleteOptions {
+  types: string[];
+  componentRestrictions: {
+    country: string;
+  };
+}
+
 // Declaração global para que o TypeScript reconheça o objeto 'google'
 // que é injetado pela API do Google Maps.
 declare global {
   interface Window {
-    google: any;
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (input: HTMLInputElement, options: AutocompleteOptions) => {
+            addListener: (eventName: string, handler: () => void) => void;
+            getPlace: () => PlaceResult;
+          };
+        };
+      };
+    };
   }
 }
 
