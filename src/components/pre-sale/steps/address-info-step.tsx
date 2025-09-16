@@ -7,6 +7,14 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import React, { useEffect, useRef, useState } from 'react';
 
+// Declaração global para que o TypeScript reconheça o objeto 'google'
+// que é injetado pela API do Google Maps.
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface AddressInfoStepProps {
   customerData: FetchedCustomerData | null;
   deliveryAddress: AddressData | null;
@@ -30,7 +38,8 @@ const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (addre
   });
 
   useEffect(() => {
-    if (inputRef.current && typeof window.google !== 'undefined') {
+    // Garante que o código só roda no navegador e que a API do Google está carregada
+    if (inputRef.current && typeof window !== 'undefined' && typeof window.google !== 'undefined') {
       const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
         types: ['address'],
         componentRestrictions: { country: 'br' },
