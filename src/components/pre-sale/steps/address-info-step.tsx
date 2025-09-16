@@ -1,11 +1,11 @@
 'use client';
 
-import type { AddressData, FetchedCustomerData } from '@/components/pre-sale/index';
+import type { AddressData, FetchedCustomerData } from '@/components/pre-sale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface AddressInfoStepProps {
   customerData: FetchedCustomerData | null;
@@ -18,6 +18,7 @@ interface AddressInfoStepProps {
 
 const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (address: AddressData) => void; initialData?: AddressData | null }) => {
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<AddressData>(initialData || {
     street: '',
     number: '',
@@ -27,8 +28,53 @@ const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (addre
     zipCode: '',
     complement: '',
   });
-  const [addressSearch, setAddressSearch] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (inputRef.current && typeof window.google !== 'undefined') {
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['address'],
+        componentRestrictions: { country: 'br' },
+      });
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) {
+          toast({
+            title: 'Endereço inválido',
+            description: 'Por favor, selecione um endereço válido da lista.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        const newAddress: AddressData = {
+          street: '',
+          number: '',
+          neighborhood: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          complement: '',
+        };
+
+        for (const component of place.address_components) {
+          const type = component.types[0];
+          if (type === 'route') newAddress.street = component.long_name;
+          if (type === 'street_number') newAddress.number = component.long_name;
+          if (type === 'sublocality_level_1') newAddress.neighborhood = component.long_name;
+          if (type === 'administrative_area_level_2') newAddress.city = component.long_name;
+          if (type === 'administrative_area_level_1') newAddress.state = component.short_name;
+          if (type === 'postal_code') newAddress.zipCode = component.long_name;
+        }
+        setFormData(newAddress);
+        onAddressChange(newAddress);
+        toast({
+          title: 'Endereço preenchido!',
+          description: 'Os campos foram preenchidos automaticamente. Por favor, revise as informações.',
+        });
+      });
+    }
+  }, [inputRef]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,73 +83,15 @@ const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (addre
     onAddressChange(newFormData);
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!addressSearch) {
-      toast({
-        title: 'Campo Vazio',
-        description: 'Por favor, digite um endereço para buscar.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const response = await fetch('/api/google-places', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ addressQuery: addressSearch }),
-      });
-      const data = await response.json();
-
-      if (response.ok && data.results && data.results.length > 0) {
-        // Assume que a API de proxy do Google Places retornou um array de endereços
-        // Preenche o formulário com o primeiro resultado
-        const foundAddress = data.results[0];
-        setFormData(foundAddress);
-        onAddressChange(foundAddress);
-        toast({
-          title: 'Endereço encontrado!',
-          description: 'Os campos foram preenchidos automaticamente.'
-        });
-      } else {
-        toast({
-          title: 'Endereço não encontrado',
-          description: 'Não encontramos o endereço. Tente novamente.',
-          variant: 'destructive'
-        });
-      }
-
-    } catch (error) {
-      console.error('Erro na busca do endereço:', error);
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro ao buscar o endereço. Tente novamente.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <Input
-          type="text"
-          placeholder="Pesquisar endereço no Google Places..."
-          value={addressSearch}
-          onChange={(e) => setAddressSearch(e.target.value)}
-          className="flex-1"
-          disabled={isSearching}
-        />
-        <Button type="submit" disabled={isSearching}>
-          {isSearching ? 'Buscando...' : 'Buscar'}
-        </Button>
-      </form>
+      <Label htmlFor="addressSearch">Pesquisar Endereço</Label>
+      <Input
+        id="addressSearch"
+        type="text"
+        placeholder="Digite seu endereço..."
+        ref={inputRef}
+      />
       <div>
         <Label htmlFor="street">Rua</Label>
         <Input type="text" name="street" value={formData.street} onChange={handleInputChange} required />
@@ -137,7 +125,6 @@ const AddressForm = ({ onAddressChange, initialData }: { onAddressChange: (addre
     </div>
   );
 };
-
 
 export default function AddressInfoStep({
   customerData,
