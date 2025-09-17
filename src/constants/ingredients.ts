@@ -1,4 +1,4 @@
-export const _INGREDIENTS = [
+export const INGREDIENTS = [
   'Batata Palha',
   'Catchup',
   'Ervilha',

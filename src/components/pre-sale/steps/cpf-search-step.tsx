@@ -104,7 +104,7 @@ export default function CpfSearchStep({
     <form onSubmit={handleCpfSearch} className="space-y-6">
       <h2 className="text-2xl font-bold text-center">Inicie seu Pedido</h2>
       <div>
-        <Label htmlFor="cpf">Seu CPF</Label>
+        <Label htmlFor="cpf" className='pb-2'>Seu CPF</Label>
         <Input
           id="cpf"
           type="text"

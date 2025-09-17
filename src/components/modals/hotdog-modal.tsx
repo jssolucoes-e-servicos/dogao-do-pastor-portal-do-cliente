@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { _INGREDIENTS } from '@/constants';
+import { INGREDIENTS } from '@/constants/ingredients';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 interface HotDogModalProps {
@@ -19,23 +19,20 @@ interface HotDogModalProps {
 }
 
 export default function HotDogModal({ isOpen, onClose, onSave }: HotDogModalProps) {
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
 
-  const handleCheckboxChange = (ingredient: string) => {
-    setSelectedIngredients((prevSelected) =>
-      prevSelected.includes(ingredient)
-        ? prevSelected.filter((item) => item !== ingredient)
-        : [...prevSelected, ingredient]
+  const handleIngredientToggle = (ingredient: string) => {
+    setRemovedIngredients((prevRemoved) =>
+      prevRemoved.includes(ingredient)
+        ? prevRemoved.filter((item) => item !== ingredient)
+        : [...prevRemoved, ingredient]
     );
   };
 
   const handleSave = () => {
-    const removedIngredients = _INGREDIENTS.filter(
-      (ingredient) => !selectedIngredients.includes(ingredient)
-    );
     onSave(removedIngredients);
     onClose();
-    setSelectedIngredients([]);
+    setRemovedIngredients([]);
   };
 
   return (
@@ -45,18 +42,22 @@ export default function HotDogModal({ isOpen, onClose, onSave }: HotDogModalProp
           <DialogTitle>Personalize seu Dogão</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <h4 className="text-lg font-semibold">Escolha os ingredientes que você quer</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {_INGREDIENTS.map((ingredient) => (
-              <div key={ingredient} className="flex items-center space-x-2">
-                <Checkbox
-                  id={ingredient}
-                  checked={selectedIngredients.includes(ingredient)}
-                  onCheckedChange={() => handleCheckboxChange(ingredient)}
-                />
-                <label htmlFor={ingredient} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  {ingredient}
-                </label>
+          <h4 className="text-lg font-semibold text-center">
+            Selecione os ingredientes que você deseja **remover**
+          </h4>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {INGREDIENTS.map((ingredient) => (
+              <div
+                key={ingredient}
+                className={cn(
+                  'p-2 rounded-lg cursor-pointer transition-colors border-2 text-center',
+                  removedIngredients.includes(ingredient)
+                    ? 'bg-red-200 border-red-500 line-through'
+                    : 'bg-green-200 border-green-500'
+                )}
+                onClick={() => handleIngredientToggle(ingredient)}
+              >
+                {ingredient}
               </div>
             ))}
           </div>

@@ -59,17 +59,16 @@ export default function OrderDetailsStep({
           orderItems.map(item => (
             <div key={item.id} className="flex items-center justify-between p-4 border rounded-md">
               <div className="flex items-center space-x-4">
-                <Image src="/hotdog.svg" alt="Hot Dog" width={50} height={50} />
+                <Image src="/assets/images/hot-dog.svg" alt="Hot Dog" width={50} height={50} />
                 <div>
-                  <h4 className="font-semibold">Dogão Personalizado</h4>
-                  {item.removedIngredients.length > 0 && (
-                    <p className="text-sm text-gray-500">
-                      Sem: {item.removedIngredients.join(', ')}
-                    </p>
-                  )}
+                  <h4 className="font-semibold">{item.removedIngredients.length > 0 ? ("Dogão Personalizado") : ("Dogão Completo")} </h4>
+                  <p className="text-sm text-gray-500">
+                    {item.removedIngredients.length > 0 ? (`Sem: ${item.removedIngredients.join(', ')}`) : ""}
+                  </p>
+
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 pl-2">
                 <span className="font-semibold">R$ 19,99</span>
                 <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id!)}>
                   <Trash2 className="size-5 text-red-500" />
