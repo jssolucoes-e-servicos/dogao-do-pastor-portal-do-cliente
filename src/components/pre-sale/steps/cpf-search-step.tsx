@@ -57,7 +57,7 @@ export default function CpfSearchStep({
       });
 
       const data = await response.json();
-
+      console.log('find-cpf', data);
       if (response.ok && data) {
         setCustomerData({
           customer: data,

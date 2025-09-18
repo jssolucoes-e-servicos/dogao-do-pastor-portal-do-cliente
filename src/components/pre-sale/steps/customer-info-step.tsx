@@ -1,3 +1,4 @@
+'use client';
 import { CustomerFormData, FetchedCustomerData } from '@/components/pre-sale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

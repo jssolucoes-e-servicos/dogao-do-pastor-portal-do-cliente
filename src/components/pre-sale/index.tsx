@@ -12,6 +12,7 @@ export interface Customer {
   name: string;
   email: string | null;
   phone: string | null;
+  cpf: string;
   addresses: AddressData[] | null;
 }
 
@@ -117,6 +118,7 @@ export function PreSaleForm() {
         return (
           <AddressInfoStep
             customerData={customerData}
+            cpf={cpf}
             deliveryAddress={deliveryAddress}
             selectedAddressId={selectedAddressId}
             setSelectedAddressId={setSelectedAddressId}
