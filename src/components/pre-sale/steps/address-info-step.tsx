@@ -1,51 +1,48 @@
-// Path: components/pre-sale/steps/adress-info-step.tsx
+// components/pre-sale/steps/adress-info-step.tsx
 'use client';
 import { Button } from '@/components/ui/button';
-import { IAddressData, IPreOrderCustomer } from '@/types/preOrderRequest';
+import { ICustomerAddressFull, ICustomerFull, IPreOrderItem } from '@/interfaces';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { DeliveryOption } from '../../../types/delivery-options.type';
 import { ContentStepAddressOrderType } from './elements/content-step-address-order-type';
 import { TypeDelivery } from './elements/type-delivery';
 import { TypeDonate } from './elements/type-donate';
 import { TypePickup } from './elements/type-pickup';
 
-// Define a estrutura do objeto de pedido completo que será enviado para a API
-interface ICompletePreOrderRequest {
-  customer: Omit<IPreOrderCustomer, 'addresses'>;
-  deliveryAddress: Partial<IAddressData> | null;
-  deliveryOption: 'pickup' | 'delivery' | 'donate';
-  items: any[];
-}
-
 interface AddressInfoStepProps {
   onPrevious: () => void;
-  customerData: IPreOrderCustomer;
-  setCustomerData: Dispatch<SetStateAction<IPreOrderCustomer>>;
-  cartItems: any[]; // Adicionei os itens do carrinho aqui
+  customerId: string | undefined;
+  addressesList: ICustomerAddressFull[] | undefined
+  orderItems: IPreOrderItem[];
+  setCustomerData: Dispatch<SetStateAction<ICustomerFull | undefined>>;
 }
 
-type DeliveryOption = 'pickup' | 'delivery' | 'donate';
-
-export default function AddressInfoStep({ onPrevious, customerData, setCustomerData, cartItems }: AddressInfoStepProps) {
-  // Define o tipo de entrega padrão como 'pickup'
+export default function AddressInfoStep({ onPrevious, customerId, addressesList, orderItems, setCustomerData }: AddressInfoStepProps) {
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('pickup');
-  const [addressData, setAddressData] = useState<Partial<IAddressData>>({});
+  const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
+  const [addressData, setAddressData] = useState<Partial<ICustomerAddressFull>>({});
 
   useEffect(() => {
-    if (customerData.addresses && customerData.addresses.length > 0) {
-      setAddressData(customerData.addresses[0]);
-      setDeliveryOption('delivery');
+    if (addressesList && addressesList.length > 0) {
+      setAddressSelected(addressesList[0]);
+      setDeliveryOption('pickup');
     } else {
-      setAddressData({});
+      setAddressSelected(null);
       setShowNewAddressForm(true);
     }
-  }, [customerData]);
+  }, [addressesList]);
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setAddressData((prev: Partial<IAddressData>) => ({ ...prev, [name]: value }));
+    setAddressData((prev: Partial<ICustomerAddressFull>) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDeliveriTymeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDeliveryTime(e.target.value);
   };
 
   const handleFinalizeAndPay = async () => {
@@ -54,41 +51,17 @@ export default function AddressInfoStep({ onPrevious, customerData, setCustomerD
     setError(null);
     setIsProcessing(true);
 
-    if (!customerData.customer?.cpf) {
-      setError('O CPF é obrigatório para a finalização do pedido.');
-      setIsProcessing(false);
-      return;
-    }
-
-    if (deliveryOption === 'delivery' && (!addressData.street || !addressData.number || !addressData.zipCode)) {
+    if (deliveryOption === 'delivery' && (!addressSelected?.street || !addressSelected.number || !addressSelected.neighborhood || !addressSelected.zipCode)) {
       setError('Por favor, preencha todos os campos obrigatórios para a entrega.');
       setIsProcessing(false);
       return;
     }
 
-    // Criar um objeto de cliente mais limpo sem o array de endereços
-    const cleanedCustomer = {
-      ...customerData.customer,
-    };
-    delete cleanedCustomer.addresses;
-
-    let orderData: ICompletePreOrderRequest;
-
-    // Condicional para montar o payload com ou sem endereço de entrega
-    if (deliveryOption === 'delivery') {
-      orderData = {
-        customer: cleanedCustomer,
-        deliveryAddress: addressData,
-        deliveryOption,
-        items: cartItems
-      };
-    } else {
-      orderData = {
-        customer: cleanedCustomer,
-        deliveryAddress: null,
-        deliveryOption,
-        items: cartItems
-      };
+    const orderData = {
+      customerId: customerId,
+      deliveryAddressId: deliveryOption === 'delivery' ? addressSelected?.id : null,
+      deliveryOption,
+      orderItems: orderItems
     }
 
     try {
@@ -105,13 +78,23 @@ export default function AddressInfoStep({ onPrevious, customerData, setCustomerD
         throw new Error(errorData.message || 'Erro ao processar o pedido. Por favor, tente novamente.');
       }
 
-      const paymentInfo = await response.json();
+      const data = await response.json();
 
-      window.location.href = paymentInfo.initPoint;
+      if (data.paymentUrl) {
+        // Redireciona o cliente para o link de pagamento do Mercado Pago
+        window.location.href = data.paymentUrl;
+      } else {
+        console.error('URL de pagamento não recebida na resposta.');
+        // Mostre uma mensagem de erro para o usuário
+      }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao finalizar o pedido:", err);
-      setError(err.message || 'Ocorreu um erro inesperado. Tente novamente.');
+      if (err instanceof Error) {
+        setError(err.message || 'Ocorreu um erro inesperado. Tente novamente.');
+      } else {
+        setError('Ocorreu um erro inesperado. Tente novamente.');
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -122,13 +105,16 @@ export default function AddressInfoStep({ onPrevious, customerData, setCustomerD
       case 'delivery':
         return (
           <TypeDelivery
-            customerData={customerData}
+            customerId={customerId}
             addressData={addressData}
             showNewAddressForm={showNewAddressForm}
-            setCustomerData={setCustomerData}
             setShowNewAddressForm={setShowNewAddressForm}
             setAddressData={setAddressData}
             handleAddressChange={handleAddressChange}
+            deliveryTime={deliveryTime}
+            handleDeliveriTymeChange={handleDeliveriTymeChange}
+            addressesList={addressesList || []}
+            setCustomerData={setCustomerData}
           />
         );
       case 'pickup':
@@ -136,7 +122,7 @@ export default function AddressInfoStep({ onPrevious, customerData, setCustomerD
       case 'donate':
         return (<TypeDonate />)
       default:
-        break;
+        return null;
     }
   };
 

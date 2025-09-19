@@ -1,13 +1,14 @@
+// components/pre-sale/steps/order-details-step.tsx
 'use client';
-
 import HotDogModal from '@/components/modals/hotdog-modal';
 import { Button } from '@/components/ui/button';
-import { IPreOrderItem } from '@/types/preOrder';
+import { IPreOrderItem } from '@/interfaces';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
 interface OrderDetailsStepProps {
+  dogPrice: number,
   orderItems: IPreOrderItem[];
   setOrderItems: React.Dispatch<React.SetStateAction<IPreOrderItem[]>>;
   onNext: () => void;
@@ -15,16 +16,17 @@ interface OrderDetailsStepProps {
 }
 
 export default function OrderDetailsStep({
+  dogPrice,
   orderItems,
   setOrderItems,
   onNext,
   onPrevious,
 }: OrderDetailsStepProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const totalValue = orderItems.length * 19.99;
+  const totalValue = orderItems.length * dogPrice;
 
   const handleSaveCustomization = (removedIngredients: string[]) => {
-    const newId = orderItems.length > 0 ? Math.max(...orderItems.map(item => item.id!)) + 1 : 1;
+    const newId = orderItems.length > 0 ? Math.max(...orderItems.map(item => item.id)) + 1 : 1;
     setOrderItems((prev: IPreOrderItem[]): IPreOrderItem[] => {
       const newItem: IPreOrderItem = {
         id: newId,
@@ -69,8 +71,8 @@ export default function OrderDetailsStep({
                 </div>
               </div>
               <div className="flex items-center space-x-2 pl-2">
-                <span className="font-semibold">R$ 19,99</span>
-                <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id!)}>
+                <span className="font-semibold">R$ {dogPrice.toFixed(2)}</span>
+                <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
                   <Trash2 className="size-5 text-red-500" />
                 </Button>
               </div>

@@ -1,4 +1,4 @@
-import { IPreOrderRequest } from '@/interfaces';
+import { IPreOrderRequest } from '@/interfaces-old';
 import { NextResponse } from 'next/server';
 
 // Pega a URL da sua API NestJS do arquivo de variáveis de ambiente.

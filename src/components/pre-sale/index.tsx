@@ -1,65 +1,28 @@
+//components/pre-sale/index.tsx
 'use client';
-
 import AddressInfoStep from '@/components/pre-sale/steps/address-info-step';
 import CpfSearchStep from '@/components/pre-sale/steps/cpf-search-step';
 import CustomerInfoStep from '@/components/pre-sale/steps/customer-info-step';
 import OrderDetailsStep from '@/components/pre-sale/steps/order-details-step';
+import { PRICE_PER_DOG } from '@/constants';
+import { ICustomerBasic, ICustomerFullWithAddress, IPreOrderItem } from '@/interfaces';
+import { PreOrderFormStep } from '@/types/pre-order-form-steps.type';
 import { useState } from 'react';
 
-// Interfaces (tipos)
-export interface Customer {
-  id: string;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  cpf: string;
-  addresses: AddressData[] | null;
-}
-
-export interface AddressData {
-  id?: string;
-  street: string;
-  number: string;
-  neighborhood?: string | null;
-  city: string;
-  state: string;
-  zipCode?: string | null;
-  complement?: string | null;
-}
-
-export interface FetchedCustomerData {
-  customer: Customer | null;
-  addresses: AddressData[] | null;
-}
-
-export interface CustomerFormData {
-  name: string;
-  email: string;
-  phone: string;
-}
-
-export interface PreOrderItemState {
-  id: number;
-  removedIngredients: string[];
-}
-
-export type FormStep = 'cpf-search' | 'customer-info' | 'order-details' | 'address-info';
-
-const PRICE_PER_DOG = 19.99;
-
 export function PreSaleForm() {
-  const [step, setStep] = useState<FormStep>('cpf-search');
+  const [step, setStep] = useState<PreOrderFormStep>('cpf-search');
   const [cpf, setCpf] = useState('84005017053');
-  const [customerData, setCustomerData] = useState<FetchedCustomerData | null>(null);
-  const [newCustomerFormData, setNewCustomerFormData] = useState<CustomerFormData>({
+  const [customer, setCustomer] = useState<ICustomerFullWithAddress | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [orderItems, setOrderItems] = useState<IPreOrderItem[]>([]);
+  const [newCustomerFormData, setNewCustomerFormData] = useState<ICustomerBasic>({
+    cpf: cpf,
     name: '',
     email: '',
     phone: '',
+    knowsChurch: true,
+    allowsChurch: true
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [orderItems, setOrderItems] = useState<PreOrderItemState[]>([]);
-  const [deliveryAddress, setDeliveryAddress] = useState<AddressData | null>(null);
-  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
 
   const handleNextStep = () => {
     if (step === 'customer-info') {
@@ -88,42 +51,37 @@ export function PreSaleForm() {
             setCpf={setCpf}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
-            setCustomerData={setCustomerData}
-            setNewCustomerFormData={setNewCustomerFormData}
-            setSelectedAddressId={setSelectedAddressId}
-            setDeliveryAddress={setDeliveryAddress}
+            setCustomer={setCustomer}
             setStep={setStep}
           />
         );
       case 'customer-info':
         return (
           <CustomerInfoStep
-            customerData={customerData}
-            newCustomerFormData={newCustomerFormData}
-            setNewCustomerFormData={setNewCustomerFormData}
+            cpf={cpf}
+            customer={customer}
+            setCustomer={setCustomer}
             onNext={handleNextStep}
+            onPrevious={() => setStep('cpf-search')}
           />
         );
       case 'order-details':
         return (
           <OrderDetailsStep
+            dogPrice={PRICE_PER_DOG}
             orderItems={orderItems}
             setOrderItems={setOrderItems}
-            total={total}
-            onNext={handleNextStep}
+            onNext={() => handleNextStep()}
             onPrevious={handlePreviousStep}
           />
         );
       case 'address-info':
         return (
           <AddressInfoStep
-            customerData={customerData}
-            cpf={cpf}
-            deliveryAddress={deliveryAddress}
-            selectedAddressId={selectedAddressId}
-            setSelectedAddressId={setSelectedAddressId}
-            setDeliveryAddress={setDeliveryAddress}
             onPrevious={handlePreviousStep}
+            customerId={customer?.id}
+            addressesList={customer?.addresses}
+            orderItems={orderItems}
           />
         );
       default:

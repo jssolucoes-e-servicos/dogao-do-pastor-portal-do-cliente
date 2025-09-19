@@ -1,20 +1,23 @@
 //components/pre-sale//steps/elements/type-delivery.tsx
 "use client"
 import { Input } from "@/components/ui/input";
-import { IAddressData, IPreOrderCustomer } from "@/types/preOrderRequest";
+import { ICustomerAddressFull, ICustomerFull } from "@/interfaces";
 import { Dispatch, SetStateAction } from "react";
 
 interface TypeDeliveryProps {
-  customerData: IPreOrderCustomer;
-  addressData: Partial<IAddressData>;
+  customerId: string | undefined;
+  addressData: Partial<ICustomerAddressFull>;
   showNewAddressForm: boolean;
-  setCustomerData: Dispatch<SetStateAction<IPreOrderCustomer>>;
+  deliveryTime: string | null;
+  handleDeliveriTymeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  addressesList: ICustomerAddressFull[];
+  setCustomerData: Dispatch<SetStateAction<ICustomerFull | undefined>>;
   setShowNewAddressForm: Dispatch<SetStateAction<boolean>>;
-  setAddressData: Dispatch<SetStateAction<Partial<IAddressData>>>;
+  setAddressData: Dispatch<SetStateAction<Partial<ICustomerAddressFull>>>;
   handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function TypeDelivery({ customerData, addressData, showNewAddressForm, setShowNewAddressForm, setAddressData, setCustomerData, handleAddressChange }: TypeDeliveryProps) {
+export function TypeDelivery({ customerId, deliveryTime, handleDeliveriTymeChange, addressData, showNewAddressForm, addressesList, setShowNewAddressForm, setAddressData, setCustomerData, handleAddressChange }: TypeDeliveryProps) {
 
 
   const handleSavedAddressSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -22,13 +25,11 @@ export function TypeDelivery({ customerData, addressData, showNewAddressForm, se
     if (selectedValue === 'new') {
       setShowNewAddressForm(true);
       setAddressData({});
-      setCustomerData(prev => ({ ...prev, deliveryAddress: {} }));
     } else {
       setShowNewAddressForm(false);
-      const selectedAddress = customerData.addresses?.find(addr => addr.id === selectedValue);
+      const selectedAddress = addressesList?.find(addr => addr.id === selectedValue);
       if (selectedAddress) {
         setAddressData(selectedAddress);
-        setCustomerData(prev => ({ ...prev, deliveryAddress: selectedAddress }));
       }
     }
   };
@@ -36,7 +37,7 @@ export function TypeDelivery({ customerData, addressData, showNewAddressForm, se
 
   return (
     <div className="space-y-4">
-      {customerData.addresses && customerData.addresses.length > 0 && (
+      {addressesList && addressesList.length > 0 && (
         <div className="space-y-2">
           <label htmlFor="saved-addresses" className="block text-sm font-medium text-gray-700">Escolha um endereço salvo:</label>
           <select
@@ -47,7 +48,7 @@ export function TypeDelivery({ customerData, addressData, showNewAddressForm, se
             value={addressData.id || ''}
           >
             <option value="">Selecione um endereço</option>
-            {customerData.addresses.map((address) => (
+            {addressesList.map((address) => (
               <option key={address.id} value={address.id}>
                 {`${address.street}, ${address.number} - ${address.neighborhood}`}
               </option>
@@ -57,7 +58,7 @@ export function TypeDelivery({ customerData, addressData, showNewAddressForm, se
         </div>
       )}
 
-      {(showNewAddressForm || !customerData.addresses || customerData.addresses.length === 0) && (
+      {(showNewAddressForm || !addressesList || addressesList.length === 0) && (
         <>
           <Input
             type="text"
@@ -112,15 +113,16 @@ export function TypeDelivery({ customerData, addressData, showNewAddressForm, se
               onChange={handleAddressChange}
             />
           </div>
-          <Input
-            type="time"
-            name="deliveryTime"
-            placeholder="Horário de entrega"
-            value={addressData.deliveryTime || ''}
-            onChange={handleAddressChange}
-          />
+
         </>
       )}
+      <Input
+        type="time"
+        name="deliveryTime"
+        placeholder="Horário de entrega"
+        value={deliveryTime || ''}
+        onChange={handleDeliveriTymeChange}
+      />
     </div>
   )
 }

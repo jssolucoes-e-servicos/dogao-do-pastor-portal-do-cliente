@@ -1,3 +1,5 @@
+import { DeliveryOption } from "./delivery-options.type";
+
 export interface IAddressData {
   id?: string;
   street?: string;
@@ -11,6 +13,7 @@ export interface IAddressData {
 }
 
 export interface IPreOrderCustomer {
+  id: string;
   fullName: string;
   email: string;
   phone: string;
@@ -32,4 +35,3 @@ export interface IPreOrderRequest {
 }
 
 
-export type DeliveryOption = 'pickup' | 'delivery' | 'donate';

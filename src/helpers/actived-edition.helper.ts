@@ -1,4 +1,4 @@
-import { IEdition } from "@/interfaces";
+import { IEdition } from "@/interfaces-old";
 import { prisma } from "@/lib/prisma";
 
 export async function GetActiveEdition(): Promise<IEdition> {

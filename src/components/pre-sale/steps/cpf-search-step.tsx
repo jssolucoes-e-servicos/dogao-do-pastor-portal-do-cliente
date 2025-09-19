@@ -1,22 +1,22 @@
+// components/pre-sale/steps/cpf-search-step.tsx
 'use client';
-
-import type { AddressData, CustomerFormData, FetchedCustomerData, FormStep } from '@/components/pre-sale/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { isValidCPF } from '@/helpers';
+import { ICustomerFullWithAddress } from '@/interfaces';
+import { PreOrderFormStep } from '@/types';
 import React from 'react';
 
 interface CpfSearchStepProps {
   cpf: string;
   setCpf: (cpf: string) => void;
   setIsLoading: (loading: boolean) => void;
-  setCustomerData: (data: FetchedCustomerData | null) => void;
-  setNewCustomerFormData: (data: CustomerFormData) => void;
-  setSelectedAddressId: (id: string) => void;
-  setDeliveryAddress: (address: AddressData | null) => void;
-  setStep: (step: FormStep) => void;
+  setCustomer: (data: ICustomerFullWithAddress | null) => void;
+  /* setDeliveryAddress: (address: ICustomerAddressFull | null) => void;
+  setSelectedAddressId: (id: string) => void; */
+  setStep: (step: PreOrderFormStep) => void;
   isLoading: boolean;
 }
 
@@ -24,10 +24,9 @@ export default function CpfSearchStep({
   cpf,
   setCpf,
   setIsLoading,
-  setCustomerData,
-  setNewCustomerFormData,
-  setSelectedAddressId,
-  setDeliveryAddress,
+  setCustomer,
+  /* setDeliveryAddress,
+  setSelectedAddressId, */
   setStep,
   isLoading,
 }: CpfSearchStepProps) {
@@ -56,38 +55,26 @@ export default function CpfSearchStep({
         body: JSON.stringify({ cpf }),
       });
 
-      const data = await response.json();
-      console.log('find-cpf', data);
+      const data: ICustomerFullWithAddress = await response.json();
       if (response.ok && data) {
-        setCustomerData({
-          customer: data,
-          addresses: data.addresses || null,
-        });
+        setCustomer(data);
 
-        setNewCustomerFormData({
-          name: data.name,
-          email: data.email || '',
-          phone: data.phone || '',
-        });
-
-        if (data.addresses && data.addresses.length > 0) {
-          setSelectedAddressId(data.addresses[0].id || '');
-          setDeliveryAddress(data.addresses[0]);
-        }
+        /*  if (data.addresses && data.addresses.length > 0) {
+           setSelectedAddressId(data.addresses[0].id || '');
+           setDeliveryAddress(data.addresses[0]);
+         } */
 
         setStep('customer-info');
-
       } else {
-        setCustomerData({ customer: null, addresses: null });
-        setDeliveryAddress(null);
-        setSelectedAddressId('new');
+        setCustomer(null);
+        /*  setDeliveryAddress(null);
+         setSelectedAddressId(''); */
         toast({
           title: 'Novo Cliente',
           description: 'Não encontramos seu cadastro. Por favor, preencha seus dados para continuar.',
         });
         setStep('customer-info');
       }
-
     } catch (error) {
       console.error('Erro na requisição:', error);
       toast({

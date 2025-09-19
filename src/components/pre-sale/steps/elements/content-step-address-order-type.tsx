@@ -1,4 +1,4 @@
-//components/pre-sale//steps/elements/step-address-order-type-button.tsx
+//components/pre-sale/steps/elements/step-address-order-type-button.tsx
 'use client';
 import { StepAddressOrderTypeButton } from "@/components/buttons/step-address-order-type-button";
 import { ICotentStepAddressOrderType } from "@/interfaces";

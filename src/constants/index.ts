@@ -1,5 +1,7 @@
-import { _INGREDIENTS } from './ingredients';
-import { _PRICE } from './price';
+import { EDITION_ID } from './editon';
+import { INGREDIENTS } from './ingredients';
+import { LANDING_PAGE_MEDIA } from './landing-page';
+import { PRICE_PER_DOG } from './price-per-dog';
 
-export { _INGREDIENTS, _PRICE };
+export { EDITION_ID, INGREDIENTS, LANDING_PAGE_MEDIA, PRICE_PER_DOG };
 
