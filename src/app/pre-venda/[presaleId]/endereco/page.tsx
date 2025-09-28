@@ -13,6 +13,7 @@ export default async function AddressPage({ params }: PresalePageProps) {
   const { presaleId } = params;
   const preorder = await findPreOrder(presaleId);
   if (!preorder) { redirect('/off-line'); }
+  if (preorder.status !== 'DIGITATION') { redirect(`/pre-venda/${presaleId}/obrigado`) }
   const customerId = preorder?.customerId ? preorder.customerId : redirect("/off-line")
   const addresses = await findCustomerAddressByCustomer(customerId)
 

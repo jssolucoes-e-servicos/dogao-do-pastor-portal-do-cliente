@@ -2,14 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { PreOrderFindResponse } from "@/interfaces";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-interface PaymentPixProps {
-  preorderId: string;
-}
-
-export function PaymentPix({ preorderId }: PaymentPixProps) {
+export function PaymentPix({ preorder }: { preorder: PreOrderFindResponse }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [pixData, setPixData] = useState<{
@@ -18,17 +15,24 @@ export function PaymentPix({ preorderId }: PaymentPixProps) {
   } | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     const generatePix = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/pix`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ preorderId }),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/payments/pix`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ preorderId: preorder.id }),
+          }
+        );
+
+        if (!res.ok) throw new Error("Erro ao gerar PIX");
+
         const data = await res.json();
         setPixData({
-          qrCodeBase64: data.point_of_interaction.transaction_data.qr_code_base64,
-          copyPaste: data.point_of_interaction.transaction_data.qr_code,
+          qrCodeBase64: data.payment.pix.qrCodeBase64,
+          copyPaste: data.payment.pix.qrCode || "",
         });
       } catch (e) {
         toast({
@@ -40,8 +44,9 @@ export function PaymentPix({ preorderId }: PaymentPixProps) {
         setLoading(false);
       }
     };
+
     generatePix();
-  }, [preorderId]);
+  }, [preorder.id, toast]);
 
   if (loading) {
     return <p className="text-gray-600">Gerando PIX, aguarde...</p>;

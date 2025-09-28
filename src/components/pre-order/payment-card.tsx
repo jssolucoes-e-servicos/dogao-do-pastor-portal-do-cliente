@@ -1,38 +1,58 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { PreOrderFindResponse } from "@/interfaces";
+import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react";
+import { useEffect, useState } from "react";
 
 interface PaymentCardProps {
-  preorderId: string;
+  preorder: PreOrderFindResponse;
 }
 
-export function PaymentCard({ preorderId }: PaymentCardProps) {
+export function PaymentCard({ preorder }: PaymentCardProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Aqui futuramente chamamos o SDK MP para gerar o card_token
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/card`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          preorderId,
-          cardToken: "tokengeradoMP",
-        }),
+  // Inicializa o SDK do MercadoPago
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY) {
+      initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, {
+        locale: "pt-BR",
       });
+    }
+  }, []);
+
+  const handleSubmit = async (token: string, installments: number) => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/payments/${preorder.id}/card`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            card: {
+              token,
+              installments,
+            },
+            payer: {
+              firstName: preorder.customer.name,
+              phone: preorder.customer.phone,
+              email: preorder.customer.email || undefined,
+            },
+          }),
+        }
+      );
 
       if (!response.ok) throw new Error("Erro ao processar pagamento");
 
-      toast({ title: "Sucesso", description: "Pagamento processado com sucesso!" });
+      toast({
+        title: "Sucesso",
+        description: "Pagamento processado com sucesso!",
+      });
     } catch (err) {
+      console.error(err);
       toast({
         title: "Erro",
         description: "Não foi possível processar o pagamento.",
@@ -44,29 +64,17 @@ export function PaymentCard({ preorderId }: PaymentCardProps) {
   };
 
   return (
-    <form onSubmit={handlePayment} className="space-y-4 max-w-md w-full">
-      <div>
-        <Label>Número do Cartão</Label>
-        <Input type="text" placeholder="0000 0000 0000 0000" required />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Validade</Label>
-          <Input type="text" placeholder="MM/AA" required />
-        </div>
-        <div>
-          <Label>CVV</Label>
-          <Input type="text" placeholder="123" required />
-        </div>
-      </div>
-      <div>
-        <Label>Nome no Cartão</Label>
-        <Input type="text" placeholder="Nome completo" required />
-      </div>
+    <div className="space-y-4 max-w-md w-full">
+      <CardPayment
+        initialization={{ amount: preorder.valueTotal }}
+        onSubmit={async ({ token, installments }) => {
+          await handleSubmit(token, installments);
+        }}
+      />
 
-      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-        {loading ? "Processando..." : "Pagar"}
-      </Button>
-    </form>
+      {loading && (
+        <p className="text-sm text-gray-500">Processando pagamento...</p>
+      )}
+    </div>
   );
 }

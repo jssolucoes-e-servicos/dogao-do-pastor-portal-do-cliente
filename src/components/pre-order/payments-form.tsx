@@ -6,23 +6,20 @@ import Image from "next/image";
 import { useState } from "react";
 
 // Subcomponentes
+import { PreOrderFindResponse } from "@/interfaces";
 import { PaymentCard } from "./payment-card";
 import { PaymentPix } from "./payment-pix";
 
-interface PaymentOptionsProps {
-  preorderId: string;
-}
-
-export function PaymentsForm({ preorderId }: PaymentOptionsProps) {
+export function PaymentsForm({ preorder }: { preorder: PreOrderFindResponse }) {
   const { toast } = useToast();
   const [method, setMethod] = useState<"PIX" | "CARD" | null>(null);
 
   if (method === "PIX") {
-    return <PaymentPix preorderId={preorderId} />;
+    return <PaymentPix preorder={preorder} />;
   }
 
   if (method === "CARD") {
-    return <PaymentCard preorderId={preorderId} />;
+    return <PaymentCard preorder={preorder} />;
   }
 
   // Tela inicial de escolha
@@ -36,15 +33,15 @@ export function PaymentsForm({ preorderId }: PaymentOptionsProps) {
           onClick={() => setMethod("PIX")}
           className="flex flex-col items-center justify-center gap-2 py-6 bg-green-600 hover:bg-green-700"
         >
-          <Image src="/assets/icons/pix.svg" alt="PIX" width={40} height={40} />
-          <span>PIX</span>
+          <Image src="/assets/images/pix.svg" alt="PIX" width={40} height={40} />
+          <span>Pagar com PIX</span>
         </Button>
 
         <Button
           onClick={() => setMethod("CARD")}
           className="flex flex-col items-center justify-center gap-2 py-6 bg-blue-600 hover:bg-blue-700"
         >
-          <Image src="/assets/icons/card.svg" alt="Cartão" width={40} height={40} />
+          <Image src="/assets/images/card.svg" alt="Cartão" width={40} height={40} />
           <span>Cartão de Crédito</span>
         </Button>
       </div>

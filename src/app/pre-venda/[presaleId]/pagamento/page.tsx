@@ -1,5 +1,5 @@
 import { findPreOrder } from "@/actions/pre-orders/find";
-import { PreOrderCustomerForm } from "@/components/pre-order/customer-form";
+import { PaymentsForm } from "@/components/pre-order/payments-form";
 
 import { redirect } from 'next/navigation';
 import { Fragment } from "react";
@@ -12,15 +12,16 @@ export default async function PresalePage({ params }: PresalePageProps) {
   const { presaleId } = params;
   const preorder = await findPreOrder(presaleId);
   if (!preorder) { redirect('/off-line'); }
+  if (preorder.status === 'PAYMENT') { redirect(`/pre-venda/${presaleId}/OBRIGADO`) }
   return (
     <Fragment>
-      <PreOrderCustomerForm preorder={preorder} />
+      <PaymentsForm preorder={preorder} />
 
-      <strong> --------------- JSON ----------------- </strong>
+      {/*  <strong> --------------- JSON ----------------- </strong>
       <div className="p-6">
         <h1 className="text-2xl font-bold">Pré-venda {presaleId}</h1>
         <pre>{JSON.stringify(preorder, null, 2)}</pre>
-      </div>
+      </div> */}
     </Fragment>
   );
 }
