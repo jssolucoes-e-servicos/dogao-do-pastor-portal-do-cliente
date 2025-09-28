@@ -16,12 +16,6 @@ export default async function PresalePage({ params }: PresalePageProps) {
   return (
     <Fragment>
       <PaymentsForm preorder={preorder} />
-
-      {/*  <strong> --------------- JSON ----------------- </strong>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Pré-venda {presaleId}</h1>
-        <pre>{JSON.stringify(preorder, null, 2)}</pre>
-      </div> */}
     </Fragment>
   );
 }
