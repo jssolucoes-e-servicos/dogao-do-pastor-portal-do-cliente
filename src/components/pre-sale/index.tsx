@@ -9,7 +9,7 @@ import { ICustomerBasic, ICustomerFullWithAddress, IPreOrderItem } from '@/inter
 import { PreOrderFormStep } from '@/types/pre-order-form-steps.type';
 import { useState } from 'react';
 
-export function PreSaleForm() {
+export function PreSaleForm({ sellerId }: { sellerId: string }) {
   const [step, setStep] = useState<PreOrderFormStep>('cpf-search');
   const [cpf, setCpf] = useState('84005017053');
   const [customer, setCustomer] = useState<ICustomerFullWithAddress | null>(null);
@@ -23,6 +23,8 @@ export function PreSaleForm() {
     knowsChurch: true,
     allowsChurch: true
   });
+
+  console.log('sellerId', sellerId);
 
   const handleNextStep = () => {
     if (step === 'customer-info') {

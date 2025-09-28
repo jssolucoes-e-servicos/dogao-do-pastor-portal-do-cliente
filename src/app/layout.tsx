@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toaster";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="pt_br" suppressHydrationWarning>
       <body>
         {children}
+        <Toaster />
       </body>
     </html>
   );

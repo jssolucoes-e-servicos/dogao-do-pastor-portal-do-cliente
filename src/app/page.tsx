@@ -1,5 +1,5 @@
-import { LANDING_PAGE_MEDIA } from '@/constants/landing-page';
 import { Button } from '@/components/ui/button';
+import { LANDING_PAGE_MEDIA } from '@/constants/landing-page';
 
 export default function LandingPage() {
   return (
@@ -13,7 +13,7 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl font-light mb-8 animate-fade-in-up">
             Participe da nossa pré-venda e concorra a uma viagem incrível para Gramado, RS!
           </p>
-          <a href="/pre-venda">
+          <a href="/pre-venda?v=dogao">
             <Button className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
               Participar da Pré-venda
             </Button>

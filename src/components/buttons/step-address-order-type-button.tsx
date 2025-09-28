@@ -8,11 +8,11 @@ import Image from "next/image";
 export function StepAddressOrderTypeButton({ deliveryOption, setDeliveryOption, type }: IStepAddressOrderType) {
   const handleLabel = () => {
     switch (type) {
-      case 'delivery':
+      case 'DELIVERY':
         return 'Quero receber'
-      case 'donate':
+      case 'DONATE':
         return 'Pode doar'
-      case 'pickup':
+      case 'PICKUP':
         return 'Vou buscar'
       default:
         break;
@@ -25,7 +25,7 @@ export function StepAddressOrderTypeButton({ deliveryOption, setDeliveryOption, 
       onClick={() => setDeliveryOption(type)}
       className={cn(
         "flex flex-col items-center justify-center p-4 h-auto w-full flex-1",
-        deliveryOption === type ? 'bg-primary text-primary-foreground' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 hover:text-black'
+        deliveryOption === type ? 'bg-primary text-primary-foreground border-orange-700 border-4' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 hover:text-black'
       )}
     >
       <Image
