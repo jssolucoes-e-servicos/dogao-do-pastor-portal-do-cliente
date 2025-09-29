@@ -1,4 +1,4 @@
-import { findPreOrder } from "@/actions/pre-orders/find";
+import { findPreInitialOrder } from "@/actions/pre-orders/find";
 import { PreOrderCustomerForm } from "@/components/pre-order/customer-form";
 import { redirect } from 'next/navigation';
 import { Fragment } from "react";
@@ -9,7 +9,7 @@ interface PresalePageProps {
 
 export default async function PresalePage({ params }: PresalePageProps) {
   const { presaleId } = params;
-  const preorder = await findPreOrder(presaleId);
+  const preorder = await findPreInitialOrder(presaleId);
   if (!preorder) { redirect('/off-line'); }
   if (preorder.status !== 'DIGITATION') { redirect(`/pre-venda/${presaleId}/obrigado`) }
   return (

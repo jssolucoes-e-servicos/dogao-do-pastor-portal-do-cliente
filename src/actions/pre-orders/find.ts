@@ -1,9 +1,9 @@
 "use server";
 
-import { PreOrderFindInitialResponse } from "@/interfaces";
+import { PreOrderFindFullResponse, PreOrderFindInitialResponse } from "@/interfaces";
 import { redirect } from "next/navigation";
 
-export const findPreOrder = async (id: string): Promise<PreOrderFindInitialResponse | null> => {
+export const findPreInitialOrder = async (id: string): Promise<PreOrderFindInitialResponse | null> => {
   try {
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/${id}`, {
@@ -11,6 +11,22 @@ export const findPreOrder = async (id: string): Promise<PreOrderFindInitialRespo
     });
 
     const data: PreOrderFindInitialResponse | null = await res.json();
+    //console.info('findPreOrder:', data);
+    return data
+  } catch (error) {
+    console.error(error);
+    redirect('off-line');
+  }
+};
+
+export const findPreOrder = async (id: string): Promise<PreOrderFindFullResponse | null> => {
+  try {
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/${id}`, {
+      cache: "no-store", // sempre buscar fresh
+    });
+
+    const data: PreOrderFindFullResponse | null = await res.json();
     //console.info('findPreOrder:', data);
     return data
   } catch (error) {
