@@ -12,6 +12,7 @@ interface TypeDeliveryProps {
   setShowNewAddressForm: Dispatch<SetStateAction<boolean>>;
   addressData: Partial<ICustomerAddressFull>;
   setAddressData: Dispatch<SetStateAction<Partial<ICustomerAddressFull>>>;
+  setAddressSelected: Dispatch<SetStateAction<Partial<ICustomerAddressFull> | null>>;
   handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 

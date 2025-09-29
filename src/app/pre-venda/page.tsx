@@ -29,6 +29,7 @@ export default async function PreVenda({ searchParams }: PreVendaProps) {
       sellerId = SELLER_ID;
     }
   } catch (error) {
+    console.error(error);
     redirect('/off-line');
   }
 

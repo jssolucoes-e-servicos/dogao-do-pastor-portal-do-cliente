@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/components/ui/use-toast";
-import { ICustomerFullWithAddress, PreOrderFindResponse } from "@/interfaces";
+import { ICustomerFullWithAddress, PreOrderFindInitialResponse } from "@/interfaces";
 import { PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface IProcessCustomerPayload {
   name: string;
@@ -19,8 +19,7 @@ interface IProcessCustomerPayload {
   presaleId?: string | null;
 }
 
-export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindResponse }) {
-  const { toast } = useToast();
+export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindInitialResponse }) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,7 +48,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindRespo
       // Se não há dados, o formulário já está em modo de edição
       setIsFormEditable(true);
     }
-  }, []);
+  }, [preorder]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -66,11 +65,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindRespo
     if (!customerFormData.phone) missingFields.push('Telefone');
 
     if (missingFields.length > 0) {
-      toast({
-        title: 'Campos incompletos',
-        description: `Por favor, preencha os seguintes campos: ${missingFields.join(', ')}.`,
-        variant: 'destructive',
-      });
+      toast.error(`Por favor, preencha os seguintes campos: ${missingFields.join(', ')}.`);
       return;
     }
 
@@ -96,11 +91,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindRespo
       router.push(`/pre-venda/${preorder.id}/pedido`)
     } catch (err) {
       console.error('Erro na requisição:', err);
-      toast({
-        title: 'Erro ao salvar',
-        description: 'Ocorreu um erro inesperado. Tente novamente.',
-        variant: 'destructive',
-      });
+      toast.error('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setIsLoading(false);
     }

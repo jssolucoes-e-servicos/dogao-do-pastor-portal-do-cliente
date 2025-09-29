@@ -1,16 +1,15 @@
 "use client";
 
-import { useToast } from "@/components/ui/use-toast";
-import { PreOrderFindResponse } from "@/interfaces";
+import { PreOrderFindFullResponse } from "@/interfaces";
 import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface PaymentCardProps {
-  preorder: PreOrderFindResponse;
+  preorder: PreOrderFindFullResponse;
 }
 
 export function PaymentCard({ preorder }: PaymentCardProps) {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   // Inicializa o SDK do MercadoPago
@@ -47,17 +46,10 @@ export function PaymentCard({ preorder }: PaymentCardProps) {
 
       if (!response.ok) throw new Error("Erro ao processar pagamento");
 
-      toast({
-        title: "Sucesso",
-        description: "Pagamento processado com sucesso!",
-      });
+      toast.success("Pagamento processado com sucesso!");
     } catch (err) {
       console.error(err);
-      toast({
-        title: "Erro",
-        description: "Não foi possível processar o pagamento.",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível processar o pagamento.");
     } finally {
       setLoading(false);
     }

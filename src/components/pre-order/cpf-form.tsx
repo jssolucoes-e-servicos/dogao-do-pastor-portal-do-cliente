@@ -2,38 +2,30 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { isValidCPF } from "@/helpers";
 import { IPresaleStartResponse, ISeller } from "@/interfaces";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface CPFFormProps { sellerId: string, seller: ISeller | null }
 
 export function PreOrderCPFForm({ sellerId, seller }: CPFFormProps) {
-  const { toast } = useToast();
   const router = useRouter();
   const [cpf, setCpf] = useState<string>('84005017053');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
   useEffect(() => {
-    toast({
-      title: 'Vendedor identificado',
-      description: !seller ? 'Continuando sem vendedor.' : `Vendedor: ${seller.name}`,
-    });
-  }, []);
+    toast(!seller ? 'Continuando sem vendedor.' : `Vendedor: ${seller.name}`);
+  }, [seller]);
 
   const handleCpfSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (!isValidCPF(cpf)) {
-      toast({
-        title: 'CPF inválido',
-        description: 'Por favor, digite um CPF válido.',
-        variant: 'destructive',
-      });
+      toast.error('CPF Inválido. Por favor, digite um CPF válido.');
       setIsLoading(false);
       return;
     }
@@ -55,11 +47,7 @@ export function PreOrderCPFForm({ sellerId, seller }: CPFFormProps) {
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro ao buscar seus dados. Tente novamente.',
-        variant: 'destructive',
-      });
+      toast.error('Ocorreu um erro ao buscar seus dados. Tente novamente.');
     } finally {
       setIsLoading(false);
     }

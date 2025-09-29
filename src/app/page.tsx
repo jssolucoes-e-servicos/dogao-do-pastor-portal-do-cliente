@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { LANDING_PAGE_MEDIA } from '@/constants/landing-page';
+import Image from 'next/image';
+import Link from 'next/link';
 
-export default function LandingPage() {
+export default async function LandingPage() {
   return (
     <main className="bg-gray-50 text-gray-800 min-h-screen">
       {/* Hero Section */}
@@ -13,11 +15,11 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl font-light mb-8 animate-fade-in-up">
             Participe da nossa pré-venda e concorra a uma viagem incrível para Gramado, RS!
           </p>
-          <a href="/pre-venda?v=dogao">
+          <Link href="/pre-venda?v=dogao">
             <Button className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
               Participar da Pré-venda
             </Button>
-          </a>
+          </Link>
         </div>
         <div className="absolute inset-0 bg-black opacity-30"></div>
       </section>
@@ -37,7 +39,7 @@ export default function LandingPage() {
             ))}
             {LANDING_PAGE_MEDIA.images.map((image, index) => (
               <div key={index} className="rounded-lg overflow-hidden shadow-xl transform transition-transform duration-300 hover:scale-105">
-                <img src={image.url} alt={image.description} className="w-full h-auto object-cover" />
+                <Image src={image.url} alt={image.description} className="w-full h-auto object-cover" />
                 <p className="p-4 text-center font-semibold">{image.description}</p>
               </div>
             ))}

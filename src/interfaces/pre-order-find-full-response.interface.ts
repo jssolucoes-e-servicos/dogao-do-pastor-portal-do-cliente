@@ -1,7 +1,7 @@
-export interface PreOrderFindResponse {
+export interface PreOrderFindFullResponse {
   id: string;
-  customerId?: string | null;
-  customer?: CustomerRetrieve | null;
+  customerId: string;
+  customer: CustomerRetrieve;
   editionId: string;
   quantity: number;
   valueTotal: number;
@@ -24,10 +24,10 @@ export interface CustomerRetrieve {
   id: string;
   name: string;
   email?: string | null;
-  phone?: string | null;
-  cpf?: string | null;
-  knowsChurch?: boolean;
-  allowsChurch?: boolean;
+  phone: string;
+  cpf: string;
+  knowsChurch: boolean;
+  allowsChurch: boolean;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;

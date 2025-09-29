@@ -2,11 +2,11 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { PreOrderFindResponse } from "@/interfaces";
+import { PreOrderFindFullResponse } from "@/interfaces";
 import { Fragment } from "react";
 
 interface TanksForPreOrderProps {
-  preorder: PreOrderFindResponse;
+  preorder: PreOrderFindFullResponse;
 }
 
 export function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {

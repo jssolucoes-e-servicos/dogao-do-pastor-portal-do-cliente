@@ -1,13 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { PreOrderFindResponse } from "@/interfaces";
+import { PreOrderFindFullResponse } from "@/interfaces";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-export function PaymentPix({ preorder }: { preorder: PreOrderFindResponse }) {
-  const { toast } = useToast();
+export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse }) {
   const [loading, setLoading] = useState(true);
   const [pixData, setPixData] = useState<{
     qrCodeBase64: string;
@@ -35,18 +34,15 @@ export function PaymentPix({ preorder }: { preorder: PreOrderFindResponse }) {
           copyPaste: data.payment.pix.qrCode || "",
         });
       } catch (e) {
-        toast({
-          title: "Erro",
-          description: "Falha ao gerar PIX.",
-          variant: "destructive",
-        });
+        console.error(e);
+        toast.error("Falha ao gerar PIX.");
       } finally {
         setLoading(false);
       }
     };
 
     generatePix();
-  }, [preorder.id, toast]);
+  }, [preorder.id]);
 
   if (loading) {
     return <p className="text-gray-600">Gerando PIX, aguarde...</p>;

@@ -1,17 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import { useState } from "react";
 
 // Subcomponentes
-import { PreOrderFindResponse } from "@/interfaces";
+import { PreOrderFindFullResponse } from "@/interfaces";
 import { PaymentCard } from "./payment-card";
 import { PaymentPix } from "./payment-pix";
 
-export function PaymentsForm({ preorder }: { preorder: PreOrderFindResponse }) {
-  const { toast } = useToast();
+export function PaymentsForm({ preorder }: { preorder: PreOrderFindFullResponse }) {
+  //const { toast } = useToast();
   const [method, setMethod] = useState<"PIX" | "CARD" | null>(null);
 
   if (method === "PIX") {

@@ -1,8 +1,7 @@
 // components/pre-sale/steps/adress-info-step.tsx
 'use client';
 
-import { useToast } from "@/components/ui/use-toast";
-import { ICustomerAddressBasic, ICustomerAddressFull, PreOrderFindResponse } from "@/interfaces";
+import { ICustomerAddressBasic, ICustomerAddressFull, PreOrderFindFullResponse } from "@/interfaces";
 import { DeliveryOption } from "@/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,13 +12,12 @@ import { TypeDonate } from "./pre-order-type/type-donate";
 import { TypePickup } from "./pre-order-type/type-pickup";
 
 interface PreOrderAddressFormProps {
-  preorder: PreOrderFindResponse,
+  preorder: PreOrderFindFullResponse,
   addresses: ICustomerAddressFull[],
   customerId: string
 }
 
 export default function PreOrderAddressForm({ preorder, addresses, customerId }: PreOrderAddressFormProps) {
-  const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('PICKUP');
@@ -49,6 +47,7 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
             showNewAddressForm={showNewAddressForm}
             setShowNewAddressForm={setShowNewAddressForm}
             setAddressData={setAddressData}
+            setAddressSelected={setAddressSelected}
             handleAddressChange={handleAddressChange}
             deliveryTime={deliveryTime}
             handleDeliveriTymeChange={handleDeliveriTymeChange}

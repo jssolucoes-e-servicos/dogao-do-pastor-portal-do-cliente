@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -38,7 +38,7 @@ export default function RootLayout({
               {children}
             </div>
 
-            <Toaster />
+            <Toaster richColors position="bottom-right" />
           </div>
 
           <footer className="z-10 w-full max-w-5xl items-center justify-center font-mono text-sm flex mt-8">

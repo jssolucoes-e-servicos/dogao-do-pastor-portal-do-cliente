@@ -2,17 +2,16 @@
 'use client';
 import HotDogModal from '@/components/modals/hotdog-modal';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { PRICE_PER_DOG } from '@/constants';
-import { IPreOrderItem, PreOrderFindResponse } from '@/interfaces';
+import { IPreOrderItem, PreOrderFindFullResponse } from '@/interfaces';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 import { useEffect, useState } from 'react';
 
-export function ItemsForm({ preorder }: { preorder: PreOrderFindResponse }) {
-  const { toast } = useToast();
+export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderItems, setOrderItems] = useState<IPreOrderItem[]>([]);
@@ -54,11 +53,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindResponse }) {
       //console.log('data:', data);
       if (!response.ok) {
         setIsLoading(false);
-        toast({
-          title: 'Erro',
-          description: 'Falha ao gravar items, tente novamente.',
-          variant: 'destructive',
-        });
+        toast.error('Falha ao gravar items, tente novamente.');
         //router.push("/off-line");
       } else {
         setIsLoading(false);
@@ -66,11 +61,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindResponse }) {
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro ao buscar seus dados. Tente novamente.',
-        variant: 'destructive',
-      });
+      toast.error('Ocorreu um erro ao buscar seus dados. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
