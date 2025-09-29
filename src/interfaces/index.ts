@@ -16,5 +16,5 @@ import { IResponseCstomerFindByCPF } from './response-customer-find-by-cpf.inter
 import { ISeller } from './seller.interface';
 import { IStepAddressOrderType } from './step-address-order-type.interface';
 
-export type { CustomerRetrieve, ICell, ICotentStepAddressOrderType, ICustomerAddressBasic, ICustomerAddressFull, ICustomerBasic, ICustomerFull, ICustomerFullWithAddress, IPreOrderItem, IPreSaleBasic, IPresaleStartResponse, IResponseCstomerFindByCPF, ISeller, IStepAddressOrderType, PreOrderFindFullResponse, PreOrderFindInitialResponse, PreOrderFindResponse };
+export type { CustomerRetrieve, ICell, ICotentStepAddressOrderType, ICustomerAddressBasic, ICustomerAddressFull, ICustomerBasic, ICustomerFull, ICustomerFullWithAddress, IPreOrderItem, IPreSaleBasic, IPresaleStartResponse, IResponseCstomerFindByCPF, ISeller, IStepAddressOrderType, PreOrderFindFullResponse, PreOrderFindInitialResponse };
 
