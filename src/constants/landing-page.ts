@@ -7,11 +7,11 @@ export const LANDING_PAGE_MEDIA = {
   ],
   images: [
     {
-      url: 'https://placehold.co/600x400/FFA500/000000?text=Foto+Dog%C3%A3o',
+      url: 'http://localhost:3000/assets/images/dogao-caixinhas.png',
       description: 'Nossos deliciosos Dogões!',
     },
     {
-      url: 'https://placehold.co/600x400/808080/FFFFFF?text=Foto+Dog%C3%A3o+na+Caixa',
+      url: 'http://localhost:3000/assets/images/dogao-caixinhas.png',
       description: 'Prontos para entrega',
     },
   ],

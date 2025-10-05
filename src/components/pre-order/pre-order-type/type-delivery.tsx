@@ -16,7 +16,7 @@ interface TypeDeliveryProps {
   handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressData, showNewAddressForm, addressesList, setShowNewAddressForm, setAddressData, handleAddressChange }: TypeDeliveryProps) {
+export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressData, showNewAddressForm, addressesList, setShowNewAddressForm, setAddressData,setAddressSelected, handleAddressChange }: TypeDeliveryProps) {
 
 
   const handleSavedAddressSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -29,6 +29,7 @@ export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressDa
       const selectedAddress = addressesList?.find(addr => addr.id === selectedValue);
       if (selectedAddress) {
         setAddressData(selectedAddress);
+        setAddressSelected(selectedAddress)
       }
     }
   };

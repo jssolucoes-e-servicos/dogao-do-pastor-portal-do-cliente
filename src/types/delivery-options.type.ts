@@ -1,2 +1,4 @@
+import { DeliveryOptionEnum } from "@/enums";
+
 //types/delivery-options.type.ts
-export type DeliveryOption = 'PICKUP' | 'DELIVERY' | 'DONATE';
+export type DeliveryOption = DeliveryOptionEnum;

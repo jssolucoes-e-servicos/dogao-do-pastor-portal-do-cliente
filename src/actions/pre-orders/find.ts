@@ -31,6 +31,6 @@ export const findPreOrder = async (id: string): Promise<PreOrderFindFullResponse
     return data
   } catch (error) {
     console.error(error);
-    redirect('off-line');
+    //redirect('/off-line');
   }
 };

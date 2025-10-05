@@ -1,8 +1,12 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { PreOrderFindFullResponse } from "@/interfaces";
 import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react";
-import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface PaymentCardProps {
@@ -10,20 +14,26 @@ interface PaymentCardProps {
 }
 
 export function PaymentCard({ preorder }: PaymentCardProps) {
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [textLoading, setTextLoading] = useState<string>("Inicializando");
 
   // Inicializa o SDK do MercadoPago
   useEffect(() => {
+    setIsLoading(true);
+    setTextLoading('Inicializando');
     if (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY) {
       initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, {
         locale: "pt-BR",
       });
     }
+     setIsLoading(false);
   }, []);
 
   const handleSubmit = async (token: string, installments: number) => {
     try {
-      setLoading(true);
+     setIsLoading(true);
+      setTextLoading('Processando pagamento');
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/payments/${preorder.id}/card`,
@@ -44,29 +54,77 @@ export function PaymentCard({ preorder }: PaymentCardProps) {
         }
       );
 
-      if (!response.ok) throw new Error("Erro ao processar pagamento");
+      if (!response.ok){ throw new Error("Erro ao processar pagamento");}else{
+        toast.success("Pagamento processado com sucesso!");
+        router.push(`/pre-venda/${preorder.id}/obrigado`);
+      }
 
-      toast.success("Pagamento processado com sucesso!");
+      
+
     } catch (err) {
       console.error(err);
       toast.error("Não foi possível processar o pagamento.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="space-y-4 max-w-md w-full">
-      <CardPayment
-        initialization={{ amount: preorder.valueTotal }}
-        onSubmit={async ({ token, installments }) => {
-          await handleSubmit(token, installments);
-        }}
-      />
+  const handleChange = async () =>{
+      setIsLoading(true);
+      setTextLoading('Alterando forma de pagamento');
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/change-step`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ preorderId: preorder.id, step: 'payment' }),
+        });
+        if (!response.ok) {
+          setIsLoading(false);
+          toast.error('Falha ao processar esta opção, tente novamente.');
+          //router.push("/off-line");
+        } else {
+          setIsLoading(false);
+          router.push(`/pre-venda/${preorder.id}/pagamento`);
+        }
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        toast.error('Ocorreu um erro ao defiir opção pagamento. Tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-      {loading && (
-        <p className="text-sm text-gray-500">Processando pagamento...</p>
-      )}
+  return (
+    <div className="flex flex-col items-center gap-6">
+            <h2 className="text-xl lg:text-2xl font-bold justify-between">Pagamento com Cartão
+              <Button 
+                onClick={handleChange}
+                 variant="link" 
+                 className="pl-4 right-0 text-sm text-gray-500 hover:text-orange-600 h-auto"
+             >
+                 ( Alterar pagamento )
+             </Button>
+            </h2>
+            <div className="flex justify-center w-full max-w-md"> 
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center gap-4 py-8 w-full">
+                        <Loader2 className="h-10 w-10 animate-spin text-orange-600" /> {/* O spinner */}
+                        <Label className="text-gray-600">{textLoading}</Label>
+                    </div>
+                ) : (
+                  <Fragment>
+                  <CardPayment
+                    initialization={{ amount: preorder.valueTotal }}
+                    onSubmit={async ({ token, installments }) => {
+                      await handleSubmit(token, installments);
+                    }}
+                  />
+
+                </Fragment>
+            )}
+        </div>
     </div>
   );
 }

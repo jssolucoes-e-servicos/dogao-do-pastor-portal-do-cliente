@@ -12,7 +12,7 @@ interface CPFFormProps { sellerId: string, seller: ISeller | null }
 
 export function PreOrderCPFForm({ sellerId, seller }: CPFFormProps) {
   const router = useRouter();
-  const [cpf, setCpf] = useState<string>('84005017053');
+  const [cpf, setCpf] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
 

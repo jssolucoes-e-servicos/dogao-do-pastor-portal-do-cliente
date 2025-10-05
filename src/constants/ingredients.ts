@@ -8,6 +8,5 @@ export const INGREDIENTS = [
   'Molho 4 queijos',
   'Mostarda',
   'Pão',
-  'Queijo Ralado',
   'Salsicha',
 ];

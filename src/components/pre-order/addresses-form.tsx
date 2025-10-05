@@ -1,10 +1,12 @@
 // components/pre-sale/steps/adress-info-step.tsx
 'use client';
 
+import { DeliveryOptionEnum } from "@/enums";
 import { ICustomerAddressBasic, ICustomerAddressFull, PreOrderFindFullResponse } from "@/interfaces";
 import { DeliveryOption } from "@/types";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { ContentStepAddressOrderType } from "./content-step-address-order-type";
 import { TypeDelivery } from "./pre-order-type/type-delivery";
@@ -20,13 +22,24 @@ interface PreOrderAddressFormProps {
 export default function PreOrderAddressForm({ preorder, addresses, customerId }: PreOrderAddressFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('PICKUP');
+  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>(DeliveryOptionEnum.pickup);
   const [addressSelectedId, setAddressSelectedId] = useState<string | null>(null)
-  const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
-  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
   const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
+  const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
   const [addressData, setAddressData] = useState<Partial<ICustomerAddressBasic>>({});
+
+
+useEffect(() => {
+    if (addressSelected?.id) {
+      setAddressSelectedId(addressSelected.id)
+      console.log('EFFETC addressSelectedId:',addressSelected.id);
+    }
+    
+  }, [addressSelected]);
 
   const handleDeliveriTymeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDeliveryTime(e.target.value);
@@ -40,7 +53,7 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
 
   const handleTypedOrder = () => {
     switch (deliveryOption) {
-      case 'DELIVERY':
+      case DeliveryOptionEnum.delivery:
         return (
           <TypeDelivery
             addressData={addressData}
@@ -54,9 +67,9 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
             addressesList={addresses}
           />
         );
-      case 'PICKUP':
+      case DeliveryOptionEnum.pickup:
         return (<TypePickup />)
-      case 'DONATE':
+      case DeliveryOptionEnum.donate:
         return (<TypeDonate />)
       default:
         return null;
@@ -67,15 +80,15 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
     if (isLoading) return;
     setError(null);
     setIsLoading(true);
-    if (deliveryOption === 'DELIVERY' && (!addressSelected?.street || !addressSelected.number || !addressSelected.neighborhood || !addressSelected.zipCode)) {
+    if (deliveryOption === DeliveryOptionEnum.delivery && (!addressData?.street || !addressData.number || !addressData.neighborhood || !addressData.zipCode)) {
       setError('Por favor, preencha todos os campos obrigatórios para a entrega.');
       setIsLoading(false);
       return;
     }
 
-    if (deliveryOption === 'DELIVERY') {
+    if (deliveryOption === DeliveryOptionEnum.delivery) {
       try {
-        const resAddress = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer-addresses/proccess-entry`, {
+        const resAddress = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer-address/proccess-entry`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -91,26 +104,33 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
             complement: addressData.complement,
           }),
         });
+
         const adressResult: ICustomerAddressFull = await resAddress.json();
-        setAddressSelectedId(adressResult.id);
+        console.log('adressResult: ',adressResult);
+        setAddressSelected(adressResult);
+        //setAddressSelectedId(adressResult.id);
       } catch (err: unknown) {
         console.error("Erro ao salvar o endereço", err);
+        toast.error("Falaha ao salvar endereço de entrega!");
         if (err instanceof Error) {
           setError(err.message || 'Ocorreu um erro inesperado. Tente novamente.');
         } else {
           setError('Ocorreu um erro inesperado. Tente novamente.');
         }
+        return
       }
     }
 
+
+    console.log('addressSelectedId:',addressSelectedId);
     const sendData = {
       preorderId: preorder.id,
-      deliveryAddressId: deliveryOption === 'DELIVERY' ? addressSelectedId : null,
+      deliveryAddressId: deliveryOption === DeliveryOptionEnum.delivery ? addressSelectedId : null,
       deliveryOption: deliveryOption
     }
 
     try {
-      if (deliveryOption === 'DELIVERY') {
+      if (deliveryOption === DeliveryOptionEnum.delivery) {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/set-address`, {
           method: 'POST',
           headers: {
@@ -122,7 +142,7 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
           const errorData = await response.json();
           throw new Error(errorData.message || 'Erro ao processar o pedido. Por favor, tente novamente.');
         }
-        router.push(`/pre-venda/${preorder.id}/pagamento`);
+    //    router.push(`/pre-venda/${preorder.id}/pagamento`);
       } else {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/set-selivery-option`, {
           method: 'POST',

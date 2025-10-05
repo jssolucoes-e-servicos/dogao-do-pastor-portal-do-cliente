@@ -43,7 +43,7 @@ export default function HotDogModal({ isOpen, onClose, onSave }: HotDogModalProp
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <h4 className="text-lg font-semibold text-center">
-            Selecione os ingredientes que você deseja **remover**
+            Selecione os ingredientes que você deseja <span className='font-bold text-red-600'>remover</span> {removedIngredients.length === 0 && 'ou cique em Dogão Completo' }
           </h4>
           <div className="grid grid-cols-2 gap-2 text-sm">
             {INGREDIENTS.map((ingredient) => (
@@ -66,8 +66,8 @@ export default function HotDogModal({ isOpen, onClose, onSave }: HotDogModalProp
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="button" onClick={handleSave}>
-            Salvar
+          <Button type="button" onClick={handleSave} className='bg-orange-600 hover:bg-orange-700'>
+            {removedIngredients.length > 0 ? 'Dogão Peronalizado':'Dogão Completo'}
           </Button>
         </DialogFooter>
       </DialogContent>

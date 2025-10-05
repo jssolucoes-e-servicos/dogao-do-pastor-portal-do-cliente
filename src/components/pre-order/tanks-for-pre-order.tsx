@@ -1,25 +1,26 @@
-// components/pre-order/tanks-for-pre-order.tsx
-'use client';
-
-import { Button } from "@/components/ui/button";
+import { PaymentStatusEnum } from "@/enums";
 import { PreOrderFindFullResponse } from "@/interfaces";
+import Link from "next/link";
 import { Fragment } from "react";
 
 interface TanksForPreOrderProps {
   preorder: PreOrderFindFullResponse;
 }
 
-export function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
+export async function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
+
+  console.log(preorder)
+
   const paymentStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'paid':
-        return 'text-green-600';
+      case 'approved':
+        return <span className='text-green-600'>Aprovado</span>;
       case 'pending':
-        return 'text-yellow-500';
+        return <span className='text-yellow-600'>Pagamento Pendente</span>;
       case 'failed':
-        return 'text-red-600';
+        return <span className='text-red-600'>Rejeitao</span>;
       default:
-        return 'text-gray-600';
+        return <span className='text--gray-600'>Pagamento Pendente</span>;
     }
   };
 
@@ -43,43 +44,43 @@ export function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
           </p>
           <p className="text-lg">
             <span className="font-semibold">Pagamento:</span>{' '}
-            <span className={paymentStatusColor(preorder.paymentStatus)}>
-              {preorder.paymentStatus.toUpperCase()}
-            </span>
+            {paymentStatusColor(preorder.paymentStatus)}
+            
           </p>
           <p className="text-lg">
             <span className="font-semibold">Forma de pagamento:</span>{' '}
-            {preorder.paymentProvider || '-'}
+            {preorder.paymentMethod && preorder.paymentMethod === 'card' ? 'Cartão' : 'PIX'}
           </p>
           {preorder.observations && (
             <p className="text-lg">
               <span className="font-semibold">Observações:</span> {preorder.observations}
             </p>
           )}
-          {preorder.paymentUrl && preorder.paymentStatus.toLowerCase() === 'pending' && (
+          {preorder.paymentStatus.toLowerCase() === PaymentStatusEnum.pending ? (
+            <Fragment>
             <p className="text-lg">
               <span className="font-semibold">Finalize seu pagamento:</span>{' '}
-              <a
-                href={preorder.paymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={`/pre-venda/${preorder.id}/pagamento`}
                 className="text-orange-400 underline"
               >
                 Clique aqui
-              </a>
+              </Link>
             </p>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-center gap-4">
-          <Button
-            className="bg-orange-600 hover:bg-orange-700"
-            onClick={() => window.location.href = '/pre-venda?v=dogao'}
-          >
-            Comprar outro
-          </Button>
+            </Fragment>
+          ) : (<Fragment>
+             <div className="mt-6 flex justify-center gap-4">
+                <Link
+                  className="bg-orange-600 hover:bg-orange-700"
+                  href={`/pre-venda?v=${preorder.sellerTag}`}
+                >
+                  Comprar outro
+                </Link>
+              </div>
+          </Fragment>)}
         </div>
       </div>
+       
     </Fragment>
   );
 }
