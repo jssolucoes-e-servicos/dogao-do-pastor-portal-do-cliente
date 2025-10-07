@@ -142,7 +142,7 @@ useEffect(() => {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Erro ao processar o pedido. Por favor, tente novamente.');
         }
-    //    router.push(`/pre-venda/${preorder.id}/pagamento`);
+        router.push(`/comprar/${preorder.id}/pagamento`);
       } else {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/set-selivery-option`, {
           method: 'POST',
