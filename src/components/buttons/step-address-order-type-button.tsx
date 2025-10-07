@@ -1,6 +1,7 @@
 //components/buttons/step-address-order-type-button.tsx
 'use client';
 import { Button } from "@/components/ui/button";
+import { DeliveryOptionEnum } from "@/enums";
 import { IStepAddressOrderType } from "@/interfaces";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -8,11 +9,11 @@ import Image from "next/image";
 export function StepAddressOrderTypeButton({ deliveryOption, setDeliveryOption, type }: IStepAddressOrderType) {
   const handleLabel = () => {
     switch (type) {
-      case 'DELIVERY':
+      case DeliveryOptionEnum.delivery:
         return 'Quero receber'
-      case 'DONATE':
+      case DeliveryOptionEnum.donate:
         return 'Pode doar'
-      case 'PICKUP':
+      case DeliveryOptionEnum.pickup:
         return 'Vou buscar'
       default:
         break;

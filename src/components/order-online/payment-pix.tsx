@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PreOrderFindFullResponse } from "@/interfaces";
+import { formatCurrency } from "@/lib/formats";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -50,7 +51,7 @@ export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse })
     setIsLoading(true);
     setTextLoading('Alterando forma de pagamento');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/change-step`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/change-step`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse })
         //router.push("/off-line");
       } else {
         setIsLoading(false);
-        router.push(`/pre-venda/${preorder.id}/pagamento`);
+        router.push(`/comprar/${preorder.id}/pagamento`);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
@@ -74,19 +75,28 @@ export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse })
   }
 
   return (<Fragment>
-        <div className="flex flex-col items-center gap-6">
-            <h2 className="text-xl lg:text-2xl font-bold justify-between">Pagamento com PIX
+        <div className="flex flex-col gap-6 p-4 rounded-lg bg-white shadow-lg w-full">
+          <h2 className="text-2xl font-bold text-center">Seu Pedido</h2>
+          <div className=" p-4 bg-gray-100 rounded-md">
+            <div className="flex justify-between items-center font-bold text-lg">
+              <span>Total ({preorder.quantity} Dogões):</span>
+              <span>{formatCurrency(preorder.valueTotal)}</span>
+            </div>
+          </div>
+
+
+            <h2 className="text-xl lg:text-2xl font-bold text-center">Pagamento com PIX
               <Button 
                 onClick={handleChange}
-                 variant="link" 
-                 className="pl-4 right-0 text-sm text-gray-500 hover:text-orange-600 h-auto"
-             >
-                 ( Alterar pagamento )
-             </Button>
+                variant="link" 
+                className="pl-4 right-0 text-sm text-gray-500 hover:text-orange-600 h-auto"
+              >
+                ( Alterar pagamento )
+              </Button>
             </h2>
 
             {/* CORREÇÃO DE CENTRALIZAÇÃO: A div abaixo agora é flexbox, não grid */}
-            <div className="flex justify-center w-full max-w-md"> 
+            <div className="flex justify-center mx-auto w-full max-w-md"> 
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center gap-4 py-8 w-full">
                         <Loader2 className="h-10 w-10 animate-spin text-orange-600" /> {/* O spinner */}
@@ -117,7 +127,7 @@ export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse })
                                 <Button
                                     onClick={generatePix}
                                     className="flex flex-col rounded-md min-h-20 items-center justify-center gap-2 py-6 
-                                               bg-green-600 hover:bg-green-700 w-full max-w-xs  text-black" // Adicionado w-full max-w-xs
+                                               bg-orange-600 hover:bg-orange-700 w-full max-w-xs  text-black" // Adicionado w-full max-w-xs
                                 >
                                     <Image src="/assets/images/pix.svg" alt="PIX" width={28} height={28} className="text-current" />
                                     <span className="font-bold text-xl">Gerar QrCode</span>

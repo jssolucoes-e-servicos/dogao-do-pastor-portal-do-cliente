@@ -29,10 +29,10 @@ export async function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
 
   return (
     <Fragment>
-      <div className="max-w-3xl mx-auto my-12 p-6 bg-gray-900 rounded-xl shadow-lg text-white">
+      <div className="flex flex-col gap-6 p-4 rounded-lg bg-white shadow-lg w-full">
         <h1 className="text-3xl font-bold text-center mb-6">Obrigado pela sua compra!</h1>
 
-        <div className="bg-gray-800 p-4 rounded-md space-y-4">
+        <div className="bg-gray-100 p-4 rounded-md space-y-4">
           <p className="text-lg">
             <span className="font-semibold">Cliente:</span> {preorder.customer?.name || 'Cliente'}
           </p>
@@ -51,17 +51,19 @@ export async function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
             <span className="font-semibold">Forma de pagamento:</span>{' '}
             {preorder.paymentMethod && preorder.paymentMethod === 'card' ? 'Cartão' : 'PIX'}
           </p>
-          {preorder.observations && (
-            <p className="text-lg">
-              <span className="font-semibold">Observações:</span> {preorder.observations}
-            </p>
-          )}
+          <p className="text-lg">
+            <span className="font-semibold">Opção de entrega:</span> 
+            {preorder.deliveryOption === 'pickup' && ' Retirada dia 22/11/2025 na Igreja Viva em Células'}
+            {preorder.deliveryOption === 'delivery' && ' Entrega'}
+            {preorder.deliveryOption === 'donate' && ' Este pedido foi marcado como doação'}
+
+          </p>
           {preorder.paymentStatus.toLowerCase() === PaymentStatusEnum.pending ? (
             <Fragment>
             <p className="text-lg">
               <span className="font-semibold">Finalize seu pagamento:</span>{' '}
               <Link
-                href={`/pre-venda/${preorder.id}/pagamento`}
+                href={`/comprar/${preorder.id}/pagamento`}
                 className="text-orange-400 underline"
               >
                 Clique aqui
@@ -69,18 +71,17 @@ export async function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {
             </p>
             </Fragment>
           ) : (<Fragment>
-             <div className="mt-6 flex justify-center gap-4">
-                <Link
-                  className="bg-orange-600 hover:bg-orange-700"
-                  href={`/pre-venda?v=${preorder.sellerTag}`}
-                >
-                  Comprar outro
-                </Link>
-              </div>
+            <div className="mt-6 flex justify-center gap-4">
+              <Link
+                className="flex flex-col rounded-md min-h-20 items-center justify-center gap-2 py-6 bg-orange-600 hover:bg-orange-700 w-full max-w-xs  text-black"
+                href={`/comprar?v=${preorder.sellerTag}`}
+              >
+                Comprar outro
+              </Link>
+            </div>
           </Fragment>)}
         </div>
       </div>
-       
     </Fragment>
   );
 }

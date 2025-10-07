@@ -1,5 +1,5 @@
 // pre-venda/page.tsx
-import { PreOrderCPFForm } from '@/components/pre-order/cpf-form';
+import { PreOrderCPFForm } from '@/components/order-online/cpf-form';
 import { SELLER_ID } from '@/constants';
 import { redirect } from 'next/navigation';
 import { Fragment } from 'react';
@@ -35,7 +35,7 @@ export default async function PreVenda({ searchParams }: PreVendaProps) {
 
   return (
     <Fragment>
-      < PreOrderCPFForm sellerId={sellerId} seller={seller} />
+      < PreOrderCPFForm sellerId={sellerId} sellerTag={sellerSlug} seller={seller} />
     </Fragment>
   );
 }

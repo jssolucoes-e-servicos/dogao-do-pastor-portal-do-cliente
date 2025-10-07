@@ -133,12 +133,12 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
   const handleProccessItems = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale-items/inserts`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online-items/inserts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ preOrderId: preorder.id, orderItems: orderItems }),
+        body: JSON.stringify({ orderOnlineId: preorder.id, orderItems: orderItems }),
       });
       //const data = await response.json();
       //console.log('data:', data);
@@ -148,7 +148,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
         //router.push("/off-line");
       } else {
         setIsLoading(false);
-        router.push(`/pre-venda/${preorder.id}/endereco`);
+        router.push(`/comprar/${preorder.id}/endereco`);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
@@ -233,7 +233,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
       </div>
 
       <Button
-        className="w-full w-full bg-orange-600 hover:bg-orange-700"
+        className="w-full bg-orange-600 hover:bg-orange-700"
         onClick={handleProccessItems}
         disabled={orderItems.length === 0 || isLoading}
       >

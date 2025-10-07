@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { INGREDIENTS } from "@/constants"
+import { toast } from "sonner"
 
-import { useToast } from "@/hooks/use-toast"
-import { AVAILABLE_INGREDIENTS, DELIVERY_TYPES, PAYMENT_METHODS } from "@/lib/models/database"
-import { validateVoucher } from "@/lib/voucher"
+//import { AVAILABLE_INGREDIENTS, DELIVERY_TYPES, PAYMENT_METHODS } from "@/lib/models/database"
+//import { validateVoucher } from "@/lib/voucher"
 
 interface SaleItem {
   id: string
@@ -30,14 +31,54 @@ interface SaleItem {
   countInSales: boolean
 }
 
+const validateVoucher = async (code: string) : Promise<boolean> => {
+  const result = code ? true : false;
+  return result
+}
+
+const PaymentMethodsList = [
+  {
+    value: 'pix-offline',
+    label: 'PIX - QrCode Impresso',
+  },
+  {
+    value: 'pix',
+    label: 'PIX - QrCode em Tela',
+  },
+  {
+    value: 'pos_pix',
+    label: 'POS - PIX na maquina',
+  },
+  {
+    value: 'pos_card_debit',
+    label: 'POS - Cartão de Débito',
+  },
+  {
+    value: 'pos_card_credit',
+    label: 'POS - Cartão de Crédito',
+  },
+  {
+    value: 'monney',
+    label: 'Dinheiro',
+  },
+  {
+    value: 'voucher',
+    label: 'VOUCHER',
+  },
+  {
+    value: 'ticket',
+    label: 'Retirado com Ticket',
+  },
+]
+
 export default function PDVPage() {
   const [activeTab, setActiveTab] = useState<"venda" | "voucher">("venda")
   const [loading, setLoading] = useState(false)
 
   // dados da edição
-  const [activeEdition, setActiveEdition] = useState<any>(null)
+  const [activeEdition, setActiveEdition] = useState<unknown>(null)
   const [availableCount, setAvailableCount] = useState(0)
-
+console.log(activeEdition)
   // venda normal
   const [saleData, setSaleData] = useState({
     customerName: "",
@@ -78,7 +119,6 @@ export default function PDVPage() {
     total: string
   } | null>(null)
 
-  const { toast } = useToast()
 
   useEffect(() => {
     loadEdition()
@@ -105,18 +145,14 @@ export default function PDVPage() {
 
   const getTotalSale = () => saleItems.reduce((s, i) => s + i.totalPrice, 0).toFixed(2)
 
-  const dogPrice = activeEdition?.valorDog ?? 19.99
+  const dogPrice:number = 19.99
 
   const handleAddItem = () => {
     const isTicketPayment = saleData.paymentMethod === "ticket_dogao"
     const ticketsNeeded = saleItems.filter((i) => i.countInSales).length + 1
 
     if (isTicketPayment && saleData.ticketNumbers.length < ticketsNeeded) {
-      toast({
-        variant: "destructive",
-        title: "Ticket necessário",
-        description: `Informe ${ticketsNeeded} ticket(s) para ${ticketsNeeded} dogão(ões).`,
-      })
+      toast.error(`Informe ${ticketsNeeded} ticket(s) para ${ticketsNeeded} dogão(ões).`)
       setShowTicketModal(true)
       return
     }
@@ -148,19 +184,11 @@ export default function PDVPage() {
       })
       const data = await res.json()
       if (!data.allAvailable) {
-        toast({
-          variant: "destructive",
-          title: "Ticket inválido ou já usado",
-          description: `Ticket ${ticketNumber} não disponível.`,
-        })
+        toast.error(`Ticket ${ticketNumber} não disponível.`)
         return
       }
       if (saleData.ticketNumbers.includes(ticketNumber)) {
-        toast({
-          variant: "destructive",
-          title: "Ticket duplicado",
-          description: "Este ticket já foi adicionado.",
-        })
+        toast.error("Este ticket já foi adicionado.")
         return
       }
       setSaleData((prev) => ({
@@ -168,16 +196,10 @@ export default function PDVPage() {
         ticketNumbers: [...prev.ticketNumbers, ticketNumber],
       }))
       setCurrentTicketInput("")
-      toast({
-        title: "Ticket adicionado",
-        description: `Ticket ${ticketNumber} validado com sucesso.`,
-      })
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Falha ao validar ticket.",
-      })
+      toast.error(`Ticket ${ticketNumber} validado com sucesso.`)
+    } catch (error: unknown) {
+      console.error(error)
+      toast.error("Falha ao validar ticket.")
     }
   }
 
@@ -198,19 +220,11 @@ export default function PDVPage() {
 
   const handleFinalizeSale = async () => {
     if (!canFinalizeSale()) {
-      toast({
-        variant: "destructive",
-        title: "Dados incompletos",
-        description: "Preencha cliente, pagamento e itens.",
-      })
+      toast.error("Dados incompletos: preencha cliente, pagamento e itens.")
       return
     }
     if (getCountedQuantity() > availableCount) {
-      toast({
-        variant: "destructive",
-        title: "Estoque insuficiente",
-        description: "Quantidade excede o limite disponível.",
-      })
+      toast.error("Quantidade excede o limite disponível.")
       return
     }
     setLoading(true)
@@ -230,10 +244,7 @@ export default function PDVPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
 
-      toast({
-        title: "Venda registrada",
-        description: `Pedido #${data.sale.orderNumber}`,
-      })
+      toast(`Venda registrada: pedido #${data.sale.orderNumber}`)
 
       setLastOrderData({
         orderNumber: data.sale.orderNumber,
@@ -258,8 +269,9 @@ export default function PDVPage() {
 
       // Recarregar dados da edição
       loadEdition()
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Erro", description: err.message })
+    } catch (error: unknown) {
+      console.error(error);
+      toast.error("Falha")
     } finally {
       setLoading(false)
     }
@@ -311,7 +323,7 @@ Obrigado!`
         </Card>
       )}
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "voucher" | "venda")}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="venda" className="flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
@@ -362,11 +374,11 @@ Obrigado!`
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DELIVERY_TYPES.map((d) => (
+                    {/*  {DELIVERY_TYPES.map((d:{value:string, label:string}) => (
                         <SelectItem key={d.value} value={d.value}>
                           {d.label}
                         </SelectItem>
-                      ))}
+                      ))} */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -412,16 +424,16 @@ Obrigado!`
                       setSaleData({
                         ...saleData,
                         paymentMethod: v,
-                        ticketNumbers: v === "ticket_dogao" ? saleData.ticketNumbers : [],
+                        ticketNumbers: v === "ticket" ? saleData.ticketNumbers : [],
                       })
-                      if (v === "ticket_dogao") setShowTicketModal(true)
+                      if (v === "ticket") setShowTicketModal(true)
                     }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Forma de pagamento" />
                     </SelectTrigger>
                     <SelectContent>
-                      {PAYMENT_METHODS.filter((p) => p.value !== "voucher").map((p) => (
+                      {PaymentMethodsList.filter((p) => p.value !== "voucher").map((p) => (
                         <SelectItem key={p.value} value={p.value}>
                           {p.label}
                         </SelectItem>
@@ -546,7 +558,7 @@ Obrigado!`
                   <div className="space-y-2">
                     <Label>Remover ingredientes (opcional)</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {AVAILABLE_INGREDIENTS.map((ing) => (
+                      {INGREDIENTS.map((ing) => (
                         <div key={ing} className="flex items-center space-x-2">
                           <Checkbox
                             id={ing}
@@ -590,10 +602,7 @@ Obrigado!`
                         const data = await res.json()
                         if (!res.ok) throw new Error(data.error)
 
-                        toast({
-                          title: "Voucher resgatado",
-                          description: `Pedido #${data.orderNumber}`,
-                        })
+                        toast.success(`Voucher resgatado: pedido #${data.orderNumber}`)
 
                         setLastOrderData({
                           orderNumber: data.orderNumber,
@@ -620,16 +629,20 @@ Obrigado!`
 
                         setVoucherData({
                           voucherCode: "",
-                          customerName: "",
-                          customerPhone: "",
+                          customer: {
+                            name: "",
+                            phone: "",
+                            cpf:""
+                          },
                           removedIngredients: [],
                           isValidated: false,
                         })
 
                         // Recarregar dados da edição
                         loadEdition()
-                      } catch (err: any) {
-                        toast({ variant: "destructive", title: "Erro", description: err.message })
+                      } catch (error: unknown) {
+                        console.error(error)
+                        toast.error("Erro")
                       } finally {
                         setLoading(false)
                       }
@@ -655,7 +668,7 @@ Obrigado!`
             <div className="space-y-2">
               <Label>Remover ingredientes (opcional)</Label>
               <div className="grid grid-cols-2 gap-2">
-                {AVAILABLE_INGREDIENTS.map((ing) => (
+                {INGREDIENTS.map((ing) => (
                   <div key={ing} className="flex items-center space-x-2">
                     <Checkbox
                       id={ing}

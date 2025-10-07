@@ -1,4 +1,4 @@
-import { TanksForPreOrder } from "@/components/pre-order/tanks-for-pre-order";
+import { TanksForPreOrder } from "@/components/order-online/tanks-for-pre-order";
 import { PreOrderStepEnum } from "@/enums";
 import { RedirectStepsHelper } from "@/helpers/redirect-steps.helper";
 import { Fragment } from "react";

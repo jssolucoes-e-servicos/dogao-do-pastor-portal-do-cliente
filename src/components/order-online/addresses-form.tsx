@@ -1,4 +1,4 @@
-// components/pre-sale/steps/adress-info-step.tsx
+// components/order-online/steps/adress-info-step.tsx
 'use client';
 
 import { DeliveryOptionEnum } from "@/enums";
@@ -36,7 +36,7 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
 useEffect(() => {
     if (addressSelected?.id) {
       setAddressSelectedId(addressSelected.id)
-      console.log('EFFETC addressSelectedId:',addressSelected.id);
+      console.log('EFFECT addressSelectedId:',addressSelected.id);
     }
     
   }, [addressSelected]);
@@ -131,7 +131,7 @@ useEffect(() => {
 
     try {
       if (deliveryOption === DeliveryOptionEnum.delivery) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/set-address`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/set-address`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ useEffect(() => {
         }
     //    router.push(`/pre-venda/${preorder.id}/pagamento`);
       } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/set-selivery-option`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/set-selivery-option`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ useEffect(() => {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Erro ao processar o pedido. Por favor, tente novamente.');
         }
-        router.push(`/pre-venda/${preorder.id}/pagamento`);
+        router.push(`/comprar/${preorder.id}/pagamento`);
       }
     } catch (err: unknown) {
       console.error("Erro ao finalizar o pedido:", err);

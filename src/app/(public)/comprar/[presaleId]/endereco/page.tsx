@@ -1,5 +1,5 @@
 import { findCustomerAddressByCustomer } from "@/actions/customer-addresses/find-by-customer";
-import PreOrderAddressForm from "@/components/pre-order/addresses-form";
+import PreOrderAddressForm from "@/components/order-online/addresses-form";
 import { PreOrderStepEnum } from "@/enums";
 import { RedirectStepsHelper } from "@/helpers/redirect-steps.helper";
 

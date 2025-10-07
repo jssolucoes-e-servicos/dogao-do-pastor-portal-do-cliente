@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface CPFFormProps { sellerId: string, seller: ISeller | null }
+interface CPFFormProps { sellerId: string, sellerTag:string, seller: ISeller | null }
 
-export function PreOrderCPFForm({ sellerId, seller }: CPFFormProps) {
+export function PreOrderCPFForm({ sellerId,sellerTag, seller }: CPFFormProps) {
   const router = useRouter();
   const [cpf, setCpf] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -31,19 +31,19 @@ export function PreOrderCPFForm({ sellerId, seller }: CPFFormProps) {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pre-sale/start`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ cpf, sellerId }),
+        body: JSON.stringify({ cpf, sellerTag, sellerId }),
       });
       const data: IPresaleStartResponse = await response.json();
       console.log('data:', data);
       if (!response.ok || !data?.presale) {
         router.push("/off-line");
       } else {
-        router.push(`/pre-venda/${data.presale.id}`);
+        router.push(`/comprar/${data.presale.id}`);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);

@@ -88,7 +88,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
       if (!response.ok || processedCustomer === null) {
         throw new Error('Erro ao salvar os dados do cliente.');
       }
-      router.push(`/pre-venda/${preorder.id}/pedido`)
+      router.push(`/comprar/${preorder.id}/pedido`)
     } catch (err) {
       console.error('Erro na requisição:', err);
       toast.error('Ocorreu um erro inesperado. Tente novamente.');

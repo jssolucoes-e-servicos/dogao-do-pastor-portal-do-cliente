@@ -1,7 +1,9 @@
 //import { getMongoInstance } from "@/lib/mongo";
 
 
+
 export async function customersFindById({customerId}:{customerId:string}) {
+  console.log(customerId)
   // Você pode adaptar para GET se preferir, mas Server Actions costuma usar POST
   try {
     /* const db = await getMongoInstance();

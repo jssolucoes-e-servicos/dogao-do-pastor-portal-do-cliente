@@ -1,16 +1,14 @@
 "use client"
 
-import type React from "react"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/hooks/use-toast"
 import { Edit, MapPin, Phone, Plus, Search, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 
 interface Client {
   _id?: string
@@ -71,6 +69,11 @@ export default function CRMPage() {
   const [phoneExists, setPhoneExists] = useState(false)
   const [isCheckingPhone, setIsCheckingPhone] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Novos estados para a modal de exclusão
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null)
+
 
   useEffect(() => {
     fetchClients()
@@ -94,7 +97,8 @@ export default function CRMPage() {
     }
   }
 
-  const checkPhoneExists = async (phone: string) => {
+  // CORREÇÃO DO WARNING: Envolvemos a função em useCallback
+  const checkPhoneExists = useCallback(async (phone: string) => {
     if (!phone || phone.length < 10) {
       setPhoneExists(false)
       return
@@ -106,7 +110,9 @@ export default function CRMPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setPhoneExists(data.exists && (!editingClient || data.clientId !== editingClient._id))
+        // Verifica se o telefone existe e se NÃO é o cliente que está sendo editado
+        const exists = data.exists && (!editingClient || data.clientId !== editingClient._id)
+        setPhoneExists(exists)
       } else {
         console.error("Erro ao verificar telefone:", response.status)
       }
@@ -115,8 +121,9 @@ export default function CRMPage() {
     } finally {
       setIsCheckingPhone(false)
     }
-  }
+  }, [editingClient, setPhoneExists]) // Dependências corretas para useCallback
 
+  // O useEffect agora usa a função checkPhoneExists estável
   useEffect(() => {
     const timer = setTimeout(() => {
       if (formData.telefone) {
@@ -125,17 +132,13 @@ export default function CRMPage() {
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [formData.telefone, editingClient])
+  }, [formData.telefone, checkPhoneExists]) // Removido editingClient, pois já é uma dependência de checkPhoneExists
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (phoneExists) {
-      toast({
-        title: "Telefone já cadastrado",
-        description: "Este número de telefone já está em uso por outro cliente.",
-        variant: "destructive",
-      })
+      toast.error( "Este número de telefone já está em uso por outro cliente.")
       return
     }
 
@@ -152,11 +155,7 @@ export default function CRMPage() {
       })
 
       if (response.ok) {
-        toast({
-          title: editingClient ? "Cliente atualizado" : "Cliente cadastrado",
-          description: editingClient ? "Cliente atualizado com sucesso!" : "Novo cliente adicionado com sucesso!",
-        })
-
+        toast(`${editingClient ?'Cliente atualizado' : 'Novo cliente adicionado'} com sucesso!`)
         fetchClients()
         setIsModalOpen(false)
         resetForm()
@@ -166,35 +165,37 @@ export default function CRMPage() {
       }
     } catch (error) {
       console.error("Erro ao salvar cliente:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar cliente. Tente novamente.",
-        variant: "destructive",
-      })
+      toast.error("Erro ao salvar cliente. Tente novamente.")
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este cliente?")) return
+  // Função para abrir a modal de confirmação de exclusão
+  const openDeleteModal = (client: Client) => {
+    setClientToDelete(client)
+    setIsDeleteModalOpen(true)
+  }
+
+  // Função que executa a exclusão
+  const executeDelete = async () => {
+    if (!clientToDelete?._id) return
 
     try {
-      const response = await fetch(`/api/clients/${id}`, {
+      const response = await fetch(`/api/clients/${clientToDelete._id}`, {
         method: "DELETE",
       })
 
       if (response.ok) {
-        toast({
-          title: "Cliente excluído",
-          description: "Cliente removido com sucesso!",
-        })
+        toast.error("Cliente removido com sucesso!")
         fetchClients()
+      } else {
+        throw new Error("Falha ao excluir")
       }
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir cliente. Tente novamente.",
-        variant: "destructive",
-      })
+      console.error(error);
+      toast.error("Erro ao excluir cliente. Tente novamente.")
+    } finally {
+      setIsDeleteModalOpen(false)
+      setClientToDelete(null)
     }
   }
 
@@ -231,6 +232,7 @@ export default function CRMPage() {
           </p>
         </div>
 
+        {/* Modal de Adição/Edição */}
         <Dialog
           open={isModalOpen}
           onOpenChange={(open) => {
@@ -388,7 +390,8 @@ export default function CRMPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => client._id && handleDelete(client._id)}
+                      // Chamamos a função que abre a modal de confirmação
+                      onClick={() => client._id && openDeleteModal(client)} 
                       className="h-8 w-8 p-0 hover:bg-destructive/20 hover:text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -417,7 +420,38 @@ export default function CRMPage() {
           </p>
         </div>
       )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="bg-popover border-border sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-popover-foreground">Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Você tem certeza que deseja excluir o cliente 
+              <span className="font-semibold text-destructive"> {clientToDelete?.nome}</span>? 
+              Esta ação é irreversível.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="border-border hover:bg-accent"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={executeDelete}
+              className="hover:bg-destructive/80"
+            >
+              Excluir Cliente
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
-

@@ -28,19 +28,19 @@ function processRedirects(presaleId:string,status:string,step:string, page:strin
         console.log('step !== page');
         switch (step) {
         case PreOrderStepEnum.customer:
-          redirect(`/pre-venda/${presaleId}`);
+          redirect(`/comprar/${presaleId}`);
         case PreOrderStepEnum.order:
-          redirect(`/pre-venda/${presaleId}/pedido`);
+          redirect(`/comprar/${presaleId}/pedido`);
         case PreOrderStepEnum.delivery:
-          redirect(`/pre-venda/${presaleId}/endereco`);
+          redirect(`/comprar/${presaleId}/endereco`);
         case PreOrderStepEnum.payment:
-          redirect(`/pre-venda/${presaleId}/pagamento`);
+          redirect(`/comprar/${presaleId}/pagamento`);
         case PreOrderStepEnum.pix:
-          redirect(`/pre-venda/${presaleId}/pagamento/pix`);
+          redirect(`/comprar/${presaleId}/pagamento/pix`);
         case PreOrderStepEnum.card:
-          redirect(`/pre-venda/${presaleId}/pagamento/cartao`);
+          redirect(`/comprar/${presaleId}/pagamento/cartao`);
         case PreOrderStepEnum.tanks:
-          redirect(`/pre-venda/${presaleId}/obrigado`);
+          redirect(`/comprar/${presaleId}/obrigado`);
         default:
           break;
       } 
@@ -50,20 +50,20 @@ function processRedirects(presaleId:string,status:string,step:string, page:strin
        if (step !== page){
         switch (step) {
           case PreOrderStepEnum.payment:
-            redirect(`/pre-venda/${presaleId}/pagamento`);
+            redirect(`/comprar/${presaleId}/pagamento`);
           case PreOrderStepEnum.pix:
-            redirect(`/pre-venda/${presaleId}/pagamento/pix`);
+            redirect(`/comprar/${presaleId}/pagamento/pix`);
           case PreOrderStepEnum.card:
-            redirect(`/pre-venda/${presaleId}/pagamento/cartao`);
+            redirect(`/comprar/${presaleId}/pagamento/cartao`);
           case PreOrderStepEnum.tanks:
-            redirect(`/pre-venda/${presaleId}/obrigado`);
+            redirect(`/comprar/${presaleId}/obrigado`);
           default:
             break;
         }
       }
     } else if (status === OrderStatsEnum.payd) {
        if (step !== page){
-        redirect(`/pre-venda/${presaleId}/obrigado`);
+        redirect(`/comprar/${presaleId}/obrigado`);
        }
     } else {
       redirect(`/acompanhar-pedido/${presaleId}`);

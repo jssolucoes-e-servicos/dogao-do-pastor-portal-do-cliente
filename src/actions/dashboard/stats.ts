@@ -1,7 +1,14 @@
 //import { getMongoInstance } from "@/lib/mongo";
 
+interface resultProps {
+  vouchers: { code: string, used: boolean }[],
+      customers: number | string,
+      sales: number | string,
+      usedVouchers: number | string,
+      availableDogs: number | string,
+}
 
-export async function getDashboardStats() {
+export async function getDashboardStats(): Promise<resultProps> {
   // Você pode adaptar para GET se preferir, mas Server Actions costuma usar POST
   try {
    /*  const db = await getMongoInstance();
@@ -34,8 +41,11 @@ export async function getDashboardStats() {
   } catch (error) {
     console.error("Erro ao buscar dados:", error);
     return {
-      error: "Erro interno do servidor",
-      details: error instanceof Error ? error.message : "Erro desconhecido",
+      vouchers: [],//vouchers.map((v) => ({ code: v.code, used: v.used })),
+      customers: 0,//customers.length,
+      sales: 0,//dogs.length,
+      usedVouchers: 0,//vouchers.filter((v) => v.used).length,
+      availableDogs: 0,//sactiveEdition ? activeEdition.limiteEdicao - dogs.length : 0,
     };
   }
 }

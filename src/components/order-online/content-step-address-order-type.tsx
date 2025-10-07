@@ -1,6 +1,7 @@
 //components/pre-sale/steps/elements/step-address-order-type-button.tsx
 'use client';
 import { StepAddressOrderTypeButton } from "@/components/buttons/step-address-order-type-button";
+import { DeliveryOptionEnum } from "@/enums";
 import { ICotentStepAddressOrderType } from "@/interfaces";
 import { Fragment } from "react";
 
@@ -13,17 +14,17 @@ export function ContentStepAddressOrderType({ deliveryOption, setDeliveryOption 
       </div>
       <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
         <StepAddressOrderTypeButton
-          type="PICKUP"
+          type={DeliveryOptionEnum.pickup}
           setDeliveryOption={setDeliveryOption}
           deliveryOption={deliveryOption}
         />
         <StepAddressOrderTypeButton
-          type="DELIVERY"
+          type={DeliveryOptionEnum.delivery}
           setDeliveryOption={setDeliveryOption}
           deliveryOption={deliveryOption}
         />
         <StepAddressOrderTypeButton
-          type="DONATE"
+          type={DeliveryOptionEnum.donate}
           setDeliveryOption={setDeliveryOption}
           deliveryOption={deliveryOption}
         />

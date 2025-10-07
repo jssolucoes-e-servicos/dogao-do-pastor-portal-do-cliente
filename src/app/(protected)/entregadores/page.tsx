@@ -1,13 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Search, Plus, Phone, Truck, Star } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
-import { MainLayout } from "@/components/main-layout"
+import { Phone, Plus, Search, Star, Truck } from "lucide-react"
+import { useState } from "react"
 
 interface Entregador {
   id: string

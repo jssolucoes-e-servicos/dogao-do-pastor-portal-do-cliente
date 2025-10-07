@@ -1,11 +1,9 @@
 "use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Clock, User, MapPin, DollarSign, ChefHat } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
-import { MainLayout } from "@/components/main-layout"
+import { ChefHat, Clock, DollarSign, MapPin, User } from "lucide-react"
 
 const pedidosPendentes = [
   {

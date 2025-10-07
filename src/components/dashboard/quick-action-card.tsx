@@ -1,11 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent } from "@/components/ui/card";
+import type { LucideIcon } from 'lucide-react';
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface IQuickActionCard {
     title: string
     description: string
-    icon: any
+    icon: LucideIcon 
     href: string
     color: string
 }

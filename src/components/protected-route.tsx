@@ -1,10 +1,10 @@
 "use client"
 
-import type React from "react"
-
-import { useAuth } from "@/contexts/auth-context"
 import { LoginForm } from "@/components/login-form"
+import { useAuth } from "@/contexts/auth-context"
 import { Loader2 } from "lucide-react"
+import type React from "react"
+import { Fragment } from "react"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -25,5 +25,5 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <LoginForm />
   }
 
-  return <>{children}</>
+  return <Fragment>{children}</Fragment>
 }

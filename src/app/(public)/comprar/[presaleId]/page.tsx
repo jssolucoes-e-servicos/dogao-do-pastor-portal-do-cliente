@@ -1,7 +1,7 @@
-import { PreOrderCustomerForm } from "@/components/pre-order/customer-form";
+import { PreOrderCustomerForm } from "@/components/order-online/customer-form";
+import { PreOrderStepEnum } from '@/enums/pre-order-step.enum';
 import { RedirectInitialStepsHelper } from "@/helpers/redirect-steps.helper";
 import { Fragment } from "react";
-import { PreOrderStepEnum } from '../../../../enums/pre-order-step.enum';
 
 interface PresalePageProps {
   params: { presaleId: string }

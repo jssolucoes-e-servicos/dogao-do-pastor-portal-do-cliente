@@ -1,11 +1,12 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 
 interface IDashboardCardContent {
     title: string
     value: string | number
-    icon: any
+    icon: LucideIcon 
     color: string
     badge?: string
     href?: string
@@ -37,7 +38,7 @@ export function DashboardCardContent({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-2xl font-bold text-card-foreground">
-               {value}
+              {value}
               </div>
             </div>
             <div className={`p-2 rounded-lg ${color}`}>

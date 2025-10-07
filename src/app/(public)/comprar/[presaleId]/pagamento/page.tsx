@@ -1,4 +1,4 @@
-import { PaymentsForm } from "@/components/pre-order/payments-form";
+import { PaymentsForm } from "@/components/order-online/payments-form";
 import { OrderStatsEnum, PreOrderStepEnum } from "@/enums";
 import { RedirectStepsHelper } from "@/helpers/redirect-steps.helper";
 
@@ -14,7 +14,7 @@ export default async function PreOrderPaymentsPage({ params }: PresalePageProps)
    const preorder = await RedirectStepsHelper({
         presaleId,
         page: PreOrderStepEnum.payment});
-  if (preorder.status === OrderStatsEnum.payd) { redirect(`/pre-venda/${presaleId}/ogrigado`) }
+  if (preorder.status === OrderStatsEnum.payd) { redirect(`/comprar/${presaleId}/ogrigado`) }
   return (
     <Fragment>
       <PaymentsForm preorder={preorder} />

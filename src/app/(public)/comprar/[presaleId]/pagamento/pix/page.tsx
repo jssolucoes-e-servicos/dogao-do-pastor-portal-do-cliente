@@ -1,4 +1,4 @@
-import { PaymentCard } from "@/components/pre-order/payment-card";
+import { PaymentPix } from "@/components/order-online/payment-pix";
 import { OrderStatsEnum, PreOrderStepEnum } from "@/enums";
 import { RedirectStepsHelper } from "@/helpers/redirect-steps.helper";
 
@@ -9,15 +9,15 @@ interface PresalePageProps {
   params: Promise<{ presaleId: string }>
 }
 
-export default async function PreOrderPaymentCardPage({ params }: PresalePageProps) {
-  const { presaleId } = await params;
+export default async function PreOrderPaymentPixPage({ params }: PresalePageProps) {
+  const { presaleId } = await  params;
    const preorder = await RedirectStepsHelper({
         presaleId,
-        page: PreOrderStepEnum.card});
-  if (preorder.status === OrderStatsEnum.payd) { redirect(`/pre-venda/${presaleId}/ogrigado`) }
+        page: PreOrderStepEnum.pix});
+  if (preorder.status === OrderStatsEnum.payd) { redirect(`/comprar/${presaleId}/obrigado`) }
   return (
     <Fragment>
-      <PaymentCard preorder={preorder} />
+      <PaymentPix preorder={preorder}/>
     </Fragment>
   );
 }

@@ -68,8 +68,8 @@ export async function CardsStats(){
                       href="/relatorios"
                     />
                     <DashboardCardContent title="Entregues"
-                         value={viewData.queueFinished} 
-                         icon={TrendingUp} color="bg-indigo-500" />
+                      value={viewData.queueFinished} 
+                      icon={TrendingUp} color="bg-indigo-500" />
                   </div>
         </Fragment>
     )
