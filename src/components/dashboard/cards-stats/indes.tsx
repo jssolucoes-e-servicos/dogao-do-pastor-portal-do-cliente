@@ -1,30 +1,56 @@
-import { getDashboardStats } from "@/actions/dashboard/stats";
+"use client"
+//import { getDashboardStats } from "@/actions/dashboard/stats";
 import { Clock, DollarSign, ShoppingBag, TrendingUp, Truck, Users } from "lucide-react";
 import { Fragment } from "react";
+import useSWR from 'swr';
 import { DashboardCardContent } from "./card-content";
 
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error('Falha ao buscar os dados do dashboard.');
+  }
+  return res.json();
+};
+
+interface DashboardStats {
+  counters: {
+    vouchers: number;
+    availableVouchers: number;
+    customers: number;
+    orders: number;
+    sellers: number;
+    usedVouchers: number;
+    availableDogs: number;
+  };
+}
+
 export async function CardsStats(){
+const { data, error, isLoading } = useSWR<DashboardStats>(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`, fetcher);
 
-    /* const res = await fetch(`/api/dashboard`, {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      }) */
-     const data = await getDashboardStats();
-      //const data = await res.json()
-      console.log(data)
+ // Exibir estado de carregamento
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
 
+  // Exibir estado de erro
+  if (error) {
+    return <div>Erro ao carregar os dados: {error.message}</div>;
+  }
 
-      const viewData = {
-        totalCustomers: data.customers,
-        totalDeliveryPersons: 0,
-        totalDogsSale: data.sales,
-        queueProduction: 0,
-        ammountValue: 0,
-        queueFinished: 0,
-      }
+  // Se os dados não estiverem disponíveis, retorna uma mensagem (embora o 'isLoading' e 'error' já tratem a maioria dos casos)
+  if (!data) {
+    return <div>Nenhum dado disponível.</div>;
+  }
+  
+  const viewData = {
+    totalCustomers: data.counters.customers,
+    totalDeliveryPersons: 0, // Como este dado não vem do backend, permanece 0
+    totalDogsSale: data.counters.saleDogs, // Usar `saleDogs` do backend
+    queueProduction: 0, // Mantido para futuras implementações
+    ammountValue: 0, // Mantido para futuras implementações
+    queueFinished: 0, // Mantido para futuras implementações
+  };
 
 
 

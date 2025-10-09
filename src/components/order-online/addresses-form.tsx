@@ -3,10 +3,12 @@
 
 import { DeliveryOptionEnum } from "@/enums";
 import { ICustomerAddressBasic, ICustomerAddressFull, PreOrderFindFullResponse } from "@/interfaces";
+import { getDistanceBetween } from "@/lib/get-distance-between";
 import { DeliveryOption } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { DeliveryDistanceLimitModal } from "../modals/delivery-distance-limit-modal";
 import { Button } from "../ui/button";
 import { ContentStepAddressOrderType } from "./content-step-address-order-type";
 import { TypeDelivery } from "./pre-order-type/type-delivery";
@@ -31,6 +33,16 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
 
   const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
   const [addressData, setAddressData] = useState<Partial<ICustomerAddressBasic>>({});
+
+// Localização da igreja
+const CHURCH_LAT = -30.1607092;
+const CHURCH_LNG = -51.1466475;
+const CHURCH_NAME = "Igreja Viva em Células";
+const CHURCH_ADDRESS = "Avenida Dr. João Dentice, 241, Restinga, Porto Alegre/RS";
+
+// Controle do modal de limite de entrega
+const [showLimitModal, setShowLimitModal] = useState(false);
+const [distanceKm, setDistanceKm] = useState<number | null>(null);
 
 
 useEffect(() => {
@@ -80,13 +92,40 @@ useEffect(() => {
     if (isLoading) return;
     setError(null);
     setIsLoading(true);
-    if (deliveryOption === DeliveryOptionEnum.delivery && (!addressData?.street || !addressData.number || !addressData.neighborhood || !addressData.zipCode)) {
+    if (deliveryOption === DeliveryOptionEnum.delivery && (!addressData?.street || !addressData.number || !addressData.neighborhood || !addressData.zipCode || !deliveryTime)) {
       setError('Por favor, preencha todos os campos obrigatórios para a entrega.');
       setIsLoading(false);
       return;
     }
 
     if (deliveryOption === DeliveryOptionEnum.delivery) {
+      const fullAddress = `${addressData.street}, ${addressData.number}, ${addressData.neighborhood}, ${addressData.city} - ${addressData.state}, ${addressData.zipCode}`;
+
+  let distance: number | null = null;
+
+  try {
+    distance = await getDistanceBetween(CHURCH_LAT, CHURCH_LNG, fullAddress);
+  } catch (err) {
+    console.error("Erro inesperado ao validar distância:", err);
+    toast.error("Não foi possível verificar a distância de entrega. Tente novamente.");
+    setIsLoading(false);
+    return; // 🔒 Bloqueia execução
+  }
+
+  if (distance === null) {
+    toast.error("Não foi possível calcular a distância. Verifique o endereço ou tente novamente.");
+    setIsLoading(false);
+    return; // 🔒 Bloqueia execução
+  }
+
+  setDistanceKm(distance);
+      if (distance && distance > 5) {
+        // Excede o limite — mostra o modal e cancela execução
+        setShowLimitModal(true);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const resAddress = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer-address/proccess-entry`, {
           method: 'POST',
@@ -126,7 +165,8 @@ useEffect(() => {
     const sendData = {
       preorderId: preorder.id,
       deliveryAddressId: deliveryOption === DeliveryOptionEnum.delivery ? addressSelectedId : null,
-      deliveryOption: deliveryOption
+      deliveryOption: deliveryOption,
+      deliveryTime: deliveryOption === DeliveryOptionEnum.delivery ? deliveryTime : null, 
     }
 
     try {
@@ -169,6 +209,40 @@ useEffect(() => {
     }
   }
 
+  const onSendToReview = async () => {
+    try{
+      setIsLoading(true);
+      setShowLimitModal(false);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/set-analysis`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            preorderId: preorder.id,
+            deliveryAddressId: addressSelectedId,
+            distance: distanceKm,
+            deliveryTime: deliveryTime, 
+          }),
+        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao processar o pedido. Por favor, tente novamente.');
+      }
+      router.push(`/comprar/${preorder.id}/analise`);
+      toast.info("Pedido enviado para análise da equipe da igreja.");
+    } catch (err: unknown) {
+      console.error("Erro ao finalizar o pedido:", err);
+      if (err instanceof Error) {
+        setError(err.message || 'Ocorreu um erro inesperado. Tente novamente.');
+      } else {
+        setError('Ocorreu um erro inesperado. Tente novamente.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 p-4 rounded-lg bg-white shadow-lg w-full">
       <ContentStepAddressOrderType
@@ -181,6 +255,19 @@ useEffect(() => {
           {error}
         </div>
       )}
+      <DeliveryDistanceLimitModal
+      isOpen={showLimitModal}
+  onClose={() => setShowLimitModal(false)}
+  onPickupSelect={() => {
+    setDeliveryOption(DeliveryOptionEnum.pickup);
+    setShowLimitModal(false);
+    toast.info("Modo de entrega alterado para retirada no local.");
+  }}
+  onSendToReview={onSendToReview}
+  churchName={CHURCH_NAME}
+  churchAddress={CHURCH_ADDRESS}
+  distanceKm={distanceKm || undefined}
+/>
       <div className="flex justify-center mt-6">
         <Button type="button" onClick={handleFinalizeAndPay} disabled={isLoading} className="w-full bg-orange-600 hover:bg-orange-700">
           {isLoading ? 'Processando...' : 'Ir para pagamento'}

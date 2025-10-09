@@ -1,6 +1,7 @@
 //components/pre-sale//steps/elements/type-delivery.tsx
 "use client"
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ICustomerAddressFull } from "@/interfaces";
 import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef } from "react";
@@ -19,7 +20,6 @@ interface TypeDeliveryProps {
 }
 
 export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressData, showNewAddressForm, addressesList, setShowNewAddressForm, setAddressData,setAddressSelected, handleAddressChange }: TypeDeliveryProps) {
-
     const streetInputRef = useRef<HTMLInputElement>(null);
 
     const initAutocomplete = useCallback(async () => {
@@ -126,7 +126,7 @@ export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressDa
         <div className="space-y-4">
             {addressesList && addressesList.length > 0 && (
                 <div className="space-y-2">
-                    <label htmlFor="saved-addresses" className="block text-sm font-medium text-gray-700">Escolha um endereço salvo:</label>
+                    <Label htmlFor="saved-addresses" className="block text-sm font-medium text-gray-700">Escolha um endereço salvo:</Label>
                     <select
                         id="saved-addresses"
                         name="addressId"
@@ -204,14 +204,22 @@ export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressDa
 
                 </>
             )}
-            <Input
+            <div className="flex gap-4">
+              <Label
+                className="text-sm font-medium text-gray-700">
+                Informe um horário aproximado entre 10 h e 21h30min
+              </Label>
+              <Input
+                className="flex-1"
                 type="time"
                 name="deliveryTime"
                 required
                 placeholder="Horário de entrega"
                 value={deliveryTime || ''}
                 onChange={handleDeliveriTymeChange}
-            />
+              />
+            </div>
+            
         </div>
     )
 }
