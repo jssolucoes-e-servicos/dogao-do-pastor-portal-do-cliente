@@ -25,6 +25,7 @@ export async function getDistanceBetween(
     const service = new DistanceMatrixService();
 
     return new Promise<number | null>((resolve, reject) => {
+      console.info('discated',reject);
       service.getDistanceMatrix(
         {
           origins: [{ lat: originLat, lng: originLng }],

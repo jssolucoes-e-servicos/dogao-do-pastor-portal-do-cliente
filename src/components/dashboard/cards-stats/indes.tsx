@@ -25,7 +25,7 @@ interface DashboardStats {
   };
 }
 
-export async function CardsStats(){
+export function CardsStats(){
 const { data, error, isLoading } = useSWR<DashboardStats>(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`, fetcher);
 
  // Exibir estado de carregamento
