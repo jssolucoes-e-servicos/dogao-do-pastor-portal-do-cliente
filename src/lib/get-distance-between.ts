@@ -34,6 +34,9 @@ export async function getDistanceBetween(
           region: "br",
         },
         (response, status) => {
+          if (!response){
+            return null;
+          }
           console.log('destinationAddress', destinationAddress);
           
           if (status === google.maps.DistanceMatrixStatus.OK && response.rows[0]?.elements[0]?.distance) {
