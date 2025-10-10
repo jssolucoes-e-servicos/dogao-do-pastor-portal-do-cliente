@@ -34,6 +34,8 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
   const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
   const [addressData, setAddressData] = useState<Partial<ICustomerAddressBasic>>({});
 
+  const [addressInline, setAddressInline]= useState<string>("");
+
 // Localização da igreja
 const CHURCH_LAT = -30.1607092;
 const CHURCH_LNG = -51.1466475;
@@ -100,7 +102,7 @@ useEffect(() => {
 
     if (deliveryOption === DeliveryOptionEnum.delivery) {
       const fullAddress = `${addressData.street}, ${addressData.number}, ${addressData.neighborhood}, ${addressData.city} - ${addressData.state}, ${addressData.zipCode}`;
-
+      setAddressInline(fullAddress);
   let distance: number | null = null;
 
   try {
@@ -147,7 +149,7 @@ useEffect(() => {
         const adressResult: ICustomerAddressFull = await resAddress.json();
         console.log('adressResult: ',adressResult);
         setAddressSelected(adressResult);
-        //setAddressSelectedId(adressResult.id);
+        setAddressSelectedId(adressResult.id);
       } catch (err: unknown) {
         console.error("Erro ao salvar o endereço", err);
         toast.error("Falaha ao salvar endereço de entrega!");
@@ -223,6 +225,7 @@ useEffect(() => {
             deliveryAddressId: addressSelectedId,
             distance: distanceKm,
             deliveryTime: deliveryTime, 
+            addressInline: addressInline,
           }),
         });
       if (!response.ok) {

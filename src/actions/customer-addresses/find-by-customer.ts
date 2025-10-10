@@ -9,7 +9,7 @@ export const findCustomerAddressByCustomer = async (customerId: string): Promise
       cache: "no-store", // sempre buscar fresh
     });
     const data: ICustomerAddressFull[] = await res.json();
-    console.info('findCustomerAddressByCustomer:', data);
+    //console.info('findCustomerAddressByCustomer:', data);
     return data
   } catch (error) {
     console.error(error);

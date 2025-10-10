@@ -39,6 +39,8 @@ function processRedirects(presaleId:string,status:string,step:string, page:strin
           redirect(`/comprar/${presaleId}/pagamento/pix`);
         case PreOrderStepEnum.card:
           redirect(`/comprar/${presaleId}/pagamento/cartao`);
+        case PreOrderStepEnum.analysis:
+          redirect(`/comprar/${presaleId}/analise`);
         case PreOrderStepEnum.tanks:
           redirect(`/comprar/${presaleId}/obrigado`);
         default:
@@ -47,7 +49,7 @@ function processRedirects(presaleId:string,status:string,step:string, page:strin
     }
   } else {
     if (status === OrderStatsEnum.pending_payment) {
-       if (step !== page){
+      if (step !== page){
         switch (step) {
           case PreOrderStepEnum.payment:
             redirect(`/comprar/${presaleId}/pagamento`);
@@ -62,9 +64,9 @@ function processRedirects(presaleId:string,status:string,step:string, page:strin
         }
       }
     } else if (status === OrderStatsEnum.payd) {
-       if (step !== page){
+      if (step !== page){
         redirect(`/comprar/${presaleId}/obrigado`);
-       }
+      }
     } else {
       redirect(`/acompanhar-pedido/${presaleId}`);
     }

@@ -23,8 +23,8 @@ export function PreOrderCPFForm({ sellerId,sellerTag, seller }: CPFFormProps) {
   const handleCpfSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    if (!isValidCPF(cpf)) {
+    const cpfNumbersOnly = cpf.replace(/\D/g, '');
+    if (!isValidCPF(cpfNumbersOnly)) {
       toast.error('CPF Inválido. Por favor, digite um CPF válido.');
       setIsLoading(false);
       return;
@@ -36,7 +36,7 @@ export function PreOrderCPFForm({ sellerId,sellerTag, seller }: CPFFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ cpf, sellerTag, sellerId }),
+        body: JSON.stringify({ cpf: cpfNumbersOnly, sellerTag, sellerId }),
       });
       const data: IPresaleStartResponse = await response.json();
       console.log('data:', data);
