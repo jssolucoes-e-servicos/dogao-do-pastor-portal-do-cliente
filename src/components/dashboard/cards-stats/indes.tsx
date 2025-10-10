@@ -21,6 +21,7 @@ interface DashboardStats {
     orders: number;
     sellers: number;
     usedVouchers: number;
+    saleDogs:number;
     availableDogs: number;
   };
 }
