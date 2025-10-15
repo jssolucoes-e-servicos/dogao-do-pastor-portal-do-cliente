@@ -2,11 +2,11 @@
 'use client';
 
 import { DeliveryOptionEnum } from "@/enums";
-import { ICustomerAddressBasic, ICustomerAddressFull, PreOrderFindFullResponse } from "@/interfaces";
+import { ICustomerAddressBasic, ICustomerAddressFull, IOrderOnline } from "@/interfaces";
 import { getDistanceBetween } from "@/lib/get-distance-between";
 import { DeliveryOption } from "@/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { DeliveryDistanceLimitModal } from "../modals/delivery-distance-limit-modal";
 import { Button } from "../ui/button";
@@ -16,7 +16,7 @@ import { TypeDonate } from "./pre-order-type/type-donate";
 import { TypePickup } from "./pre-order-type/type-pickup";
 
 interface PreOrderAddressFormProps {
-  preorder: PreOrderFindFullResponse,
+  preorder: IOrderOnline,
   addresses: ICustomerAddressFull[],
   customerId: string
 }
@@ -33,9 +33,8 @@ export default function PreOrderAddressForm({ preorder, addresses, customerId }:
 
   const [addressSelected, setAddressSelected] = useState<Partial<ICustomerAddressFull> | null>(null);
   const [addressData, setAddressData] = useState<Partial<ICustomerAddressBasic>>({});
-
+  console.info('null',addressSelected);
   const [addressInline, setAddressInline]= useState<string>("");
-
 // Localização da igreja
 const CHURCH_LAT = -30.1607092;
 const CHURCH_LNG = -51.1466475;
@@ -45,15 +44,6 @@ const CHURCH_ADDRESS = "Avenida Dr. João Dentice, 241, Restinga, Porto Alegre/R
 // Controle do modal de limite de entrega
 const [showLimitModal, setShowLimitModal] = useState(false);
 const [distanceKm, setDistanceKm] = useState<number | null>(null);
-
-
-useEffect(() => {
-    if (addressSelected?.id) {
-      setAddressSelectedId(addressSelected.id)
-      console.log('EFFECT addressSelectedId:',addressSelected.id);
-    }
-    
-  }, [addressSelected]);
 
   const handleDeliveriTymeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDeliveryTime(e.target.value);
@@ -91,6 +81,7 @@ useEffect(() => {
   }
 
   const handleFinalizeAndPay = async () => {
+    let customerAddressId: string | null = null;
     if (isLoading) return;
     setError(null);
     setIsLoading(true);
@@ -119,16 +110,8 @@ useEffect(() => {
     setIsLoading(false);
     return; // 🔒 Bloqueia execução
   }
-
-  setDistanceKm(distance);
-      if (distance && distance > 5) {
-        // Excede o limite — mostra o modal e cancela execução
-        setShowLimitModal(true);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
+  
+  try {
         const resAddress = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer-address/proccess-entry`, {
           method: 'POST',
           headers: {
@@ -147,9 +130,9 @@ useEffect(() => {
         });
 
         const adressResult: ICustomerAddressFull = await resAddress.json();
-        console.log('adressResult: ',adressResult);
-        setAddressSelected(adressResult);
         setAddressSelectedId(adressResult.id);
+        customerAddressId = adressResult.id;
+      
       } catch (err: unknown) {
         console.error("Erro ao salvar o endereço", err);
         toast.error("Falaha ao salvar endereço de entrega!");
@@ -160,13 +143,18 @@ useEffect(() => {
         }
         return
       }
+
+    setDistanceKm(distance);
+      if (distance && distance > 5) {
+        setShowLimitModal(true);
+        setIsLoading(false);
+        return;
+      }
     }
 
-
-    console.log('addressSelectedId:',addressSelectedId);
     const sendData = {
       preorderId: preorder.id,
-      deliveryAddressId: deliveryOption === DeliveryOptionEnum.delivery ? addressSelectedId : null,
+      deliveryAddressId: customerAddressId,
       deliveryOption: deliveryOption,
       deliveryTime: deliveryOption === DeliveryOptionEnum.delivery ? deliveryTime : null, 
     }

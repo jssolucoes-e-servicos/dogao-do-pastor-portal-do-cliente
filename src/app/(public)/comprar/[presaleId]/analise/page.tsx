@@ -11,7 +11,6 @@ export default async function PreOrderTanksPage({ params }: PresalePageProps) {
    const preorder = await RedirectStepsHelper({
         presaleId,
         page: PreOrderStepEnum.analysis});
-
   return (
     <Fragment>
       <AnalysisPreOrder preorder={preorder} />

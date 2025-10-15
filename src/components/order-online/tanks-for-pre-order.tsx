@@ -1,10 +1,10 @@
 import { PaymentStatusEnum } from "@/enums";
-import { PreOrderFindFullResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import Link from "next/link";
 import { Fragment } from "react";
 
 interface TanksForPreOrderProps {
-  preorder: PreOrderFindFullResponse;
+  preorder: IOrderOnline;
 }
 
 export async function TanksForPreOrder({ preorder }: TanksForPreOrderProps) {

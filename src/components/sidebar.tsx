@@ -2,27 +2,27 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
+import { cn } from "@/lib/utils"
 import {
-  Menu,
-  Users,
-  Truck,
-  ShoppingBag,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
   Clock,
   CreditCard,
   FileText,
   LogOut,
-  ChevronDown,
-  ChevronRight,
-  BarChart3,
+  Menu,
+  ShoppingBag,
+  Truck,
+  Users,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 interface NavItem {
   title: string
@@ -40,39 +40,54 @@ const navItems: NavItem[] = [
   },
   {
     title: "Clientes",
-    href: "/clientes",
+    href: "/app/clientes",
+    icon: Users,
+  },
+  {
+    title: "Vendedores",
+    href: "/app/vendedores",
+    icon: Users,
+  },
+  {
+    title: "Redes de Células",
+    href: "/app/redes-de-celulas",
+    icon: Users,
+  },
+  {
+    title: "Células",
+    href: "/app/celulas",
     icon: Users,
   },
   {
     title: "Entregadores",
-    href: "/entregadores",
+    href: "/app/entregadores",
     icon: Truck,
   },
   {
     title: "Pedidos",
-    href: "/pedidos",
+    href: "/app/pedidos",
     icon: ShoppingBag,
   },
   {
     title: "Filas",
-    href: "/filas",
+    href: "/app/filas",
     icon: Clock,
     children: [
-      { title: "Pendentes", href: "/filas/pendentes", icon: Clock, badge: "3" },
-      { title: "Em Preparo", href: "/filas/preparo", icon: Clock, badge: "5" },
-      { title: "Prontos", href: "/filas/prontos", icon: Clock, badge: "2" },
-      { title: "Em Entrega", href: "/filas/entrega", icon: Clock, badge: "4" },
-      { title: "Entregues", href: "/filas/entregues", icon: Clock },
+      { title: "Pendentes", href: "/app/filas/pendentes", icon: Clock, badge: "3" },
+      { title: "Em Preparo", href: "/app/filas/preparo", icon: Clock, badge: "5" },
+      { title: "Prontos", href: "/app/filas/prontos", icon: Clock, badge: "2" },
+      { title: "Em Entrega", href: "/app/filas/entrega", icon: Clock, badge: "4" },
+      { title: "Entregues", href: "/app/filas/entregues", icon: Clock },
     ],
   },
   {
     title: "PDV",
-    href: "/pdv",
+    href: "/app/pdv",
     icon: CreditCard,
   },
   {
     title: "Relatórios",
-    href: "/relatorios",
+    href: "/app/relatorios",
     icon: FileText,
   },
 ]
