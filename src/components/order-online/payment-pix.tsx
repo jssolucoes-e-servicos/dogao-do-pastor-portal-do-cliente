@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { PreOrderFindFullResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import { formatCurrency } from "@/lib/formats";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
-export function PaymentPix({ preorder }: { preorder: PreOrderFindFullResponse }) {
+export function PaymentPix({ preorder }: { preorder: IOrderOnline }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [textLoading, setTextLoading] = useState<string>("Inicializando");

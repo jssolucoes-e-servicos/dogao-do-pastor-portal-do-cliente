@@ -21,7 +21,7 @@ export function DashboardCardContent({
     href,
   }: IDashboardCardContent) {
 
-    console.log(`DashboardCardContent-${title}`, value)
+   // console.log(`DashboardCardContent-${title}`, value)
     const Content = (
       <Card className="bg-card border-border hover:border-primary/50 transition-all duration-200 hover:shadow-lg">
         <CardHeader className="pb-3">

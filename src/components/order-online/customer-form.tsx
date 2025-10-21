@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ICustomerFullWithAddress, PreOrderFindInitialResponse } from "@/interfaces";
+import { ICustomerFullWithAddress, IOrderOnline } from "@/interfaces";
 import { PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
@@ -19,7 +19,7 @@ interface IProcessCustomerPayload {
   presaleId?: string | null;
 }
 
-export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindInitialResponse }) {
+export function PreOrderCustomerForm({ preorder }: { preorder: IOrderOnline }) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,8 +29,8 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
     email: '',
     phone: '',
     cpf: preorder.observations,
-    knowsChurch: false,
-    allowsChurch: false,
+    knowsChurch: true,
+    allowsChurch: true,
     presaleId: null,
   });
 
@@ -62,7 +62,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
   const handleProcessEntry = async () => {
     const missingFields = [];
     if (!customerFormData.name) missingFields.push('Nome');
-    if (!customerFormData.phone) missingFields.push('Telefone');
+    if (!customerFormData.phone || customerFormData.phone.length !== 11) missingFields.push('WhatsApp');
 
     if (missingFields.length > 0) {
       toast.error(`Por favor, preencha os seguintes campos: ${missingFields.join(', ')}.`);
@@ -89,10 +89,10 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
         throw new Error('Erro ao salvar os dados do cliente.');
       }
       router.push(`/comprar/${preorder.id}/pedido`)
+      setIsLoading(false);
     } catch (err) {
       console.error('Erro na requisição:', err);
       toast.error('Ocorreu um erro inesperado. Tente novamente.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -108,6 +108,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
         size="sm"
         className="absolute top-2 right-2 text-gray-500 hover:text-gray-900"
         onClick={() => setIsFormEditable(true)}
+        disabled={isLoading}
       >
         <PencilIcon className="h-4 w-4 mr-2" />
       </Button>
@@ -117,17 +118,18 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
   const renderForm = () => (
     <div className="flex flex-col gap-4">
       <div>
-        <Label htmlFor="name">Nome Completo<span className="text-red-500">*</span></Label>
+        <Label className="mb-2" htmlFor="name">Nome Completo<span className="text-red-500">*</span></Label>
         <Input
           id="name"
           placeholder="Nome Completo"
           name="name"
           value={customerFormData.name}
           onChange={handleInputChange}
+          disabled={isLoading}
         />
       </div>
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label className="mb-2" htmlFor="email">Email</Label>
         <Input
           id="email"
           placeholder="Email"
@@ -135,16 +137,20 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
           type="email"
           value={customerFormData.email}
           onChange={handleInputChange}
+          disabled={isLoading}
         />
       </div>
       <div>
-        <Label htmlFor="phone">Telefone<span className="text-red-500">*</span></Label>
+        <Label className="mb-2" htmlFor="phone">Whatsapp<span className="text-red-500">*</span> Ex: 51999999999</Label>
         <Input
           id="phone"
-          placeholder="Telefone"
+          placeholder="WhatsApp"
           name="phone"
+          minLength={11}
+          max={11}
           value={customerFormData.phone}
           onChange={handleInputChange}
+          disabled={isLoading}
         />
       </div>
       <div className="flex items-center space-x-2">
@@ -152,6 +158,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
           id="knows-church"
           checked={customerFormData.knowsChurch}
           onCheckedChange={(checked) => handleSwitchChange('knowsChurch', checked)}
+          disabled={isLoading}
         />
         <Label htmlFor="knows-church">Conhece a IVC?</Label>
       </div>
@@ -160,6 +167,7 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
           id="allows-church"
           checked={customerFormData.allowsChurch}
           onCheckedChange={(checked) => handleSwitchChange('allowsChurch', checked)}
+          disabled={isLoading}
         />
         <Label htmlFor="allows-church">Aceito receber mensagens?</Label>
       </div>
@@ -170,7 +178,8 @@ export function PreOrderCustomerForm({ preorder }: { preorder: PreOrderFindIniti
     <Fragment>
       <div className="flex flex-col gap-6 p-4 rounded-lg bg-white shadow-lg w-full">
         <h2 className="text-2xl font-bold text-center">Confirme seus dados</h2>
-        {!isFormEditable && preorder.customer ? renderSummary() : renderForm()}
+
+        {!isFormEditable && !preorder.customer.firstRegister ? renderSummary() : renderForm()}
         <Button onClick={handleProcessEntry} disabled={isLoading} className="w-full bg-orange-600 hover:bg-orange-700">
           {isLoading ? 'Salvando...' : 'Montar pedido'}
         </Button>

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { PreOrderFindFullResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import { formatCurrency } from "@/lib/formats";
 import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react";
 import { Loader2 } from "lucide-react";
@@ -11,7 +11,7 @@ import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface PaymentCardProps {
-  preorder: PreOrderFindFullResponse;
+  preorder: IOrderOnline;
 }
 
 export function PaymentCard({ preorder }: PaymentCardProps) {

@@ -1,7 +1,7 @@
 "use client"
-
+import { useRouter } from "next/navigation"
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState } from "react"
 
 interface User {
   id: string
@@ -12,51 +12,37 @@ interface User {
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
-  logout: () => void
-  isLoading: boolean
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
-  useEffect(() => {
-    // Check if user is logged in on mount
-    const savedUser = localStorage.getItem("crm-user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
-    setIsLoading(false)
-  }, [])
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true)
-
-    // Simple authentication - in production, this would be an API call
-    if (email === "admin@dogao.com" && password === "admin123") {
-      const userData = {
-        id: "1",
-        name: "Administrador",
-        email: "admin@dogao.com",
-      }
-      setUser(userData)
-      localStorage.setItem("crm-user", JSON.stringify(userData))
-      setIsLoading(false)
+  const login = async (username: string, password: string): Promise<boolean> => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setUser(data.user)
+      router.push('/app') // Redireciona para a página inicial após o login
       return true
     }
-
-    setIsLoading(false)
     return false
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await fetch('/api/auth/logout')
     setUser(null)
-    localStorage.removeItem("crm-user")
+    router.push('/acesso') // Redireciona para a página de login após o logout
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

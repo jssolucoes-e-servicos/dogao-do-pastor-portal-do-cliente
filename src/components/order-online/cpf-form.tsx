@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isValidCPF } from "@/helpers";
-import { IPresaleStartResponse, ISeller } from "@/interfaces";
+import { ISeller } from "@/interfaces";
+import { IOrderOnlineStartResponse } from "@/interfaces/find-order-online.interface";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -38,17 +39,20 @@ export function PreOrderCPFForm({ sellerId,sellerTag, seller }: CPFFormProps) {
         },
         body: JSON.stringify({ cpf: cpfNumbersOnly, sellerTag, sellerId }),
       });
-      const data: IPresaleStartResponse = await response.json();
-      console.log('data:', data);
+      const data: IOrderOnlineStartResponse = await response.json();
+
+      console.log('cpf: ', data);
+      
       if (!response.ok || !data?.presale) {
         router.push("/off-line");
+        setIsLoading(false);
       } else {
         router.push(`/comprar/${data.presale.id}`);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
       toast.error('Ocorreu um erro ao buscar seus dados. Tente novamente.');
-    } finally {
       setIsLoading(false);
     }
   };
