@@ -12,12 +12,8 @@ import { Fragment, useState } from "react";
 import useSWR from "swr";
 
 export function CustomersListForm(){
-<<<<<<< HEAD
-  const { data, error, isLoading } = useSWR<ICustomerRetrieve[]>(`customer`, fetcherGet);
-=======
-  const { data, error, isLoading } = useSWR<ICustomerRetrieve[]>(`customers`, fetcherGet);
->>>>>>> 3d44ee2dccdac8587229749933610e1a57539636
 
+  const { data, error, isLoading } = useSWR<ICustomerRetrieve[]>(`customers`, fetcherGet);
   const [searchTerm, setSearchTerm] = useState("");
 
   if (error) {
