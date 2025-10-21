@@ -55,8 +55,8 @@ export default function RootLayout({
                   <span className="hover:text-gray-700">Igreja Viva em Células</span>
                 </span>
               </a>
+              <span className="hover:text-gray-500">{VERSION}</span>
             </div> 
-            <span className="hover:text-gray-700">{VERSION}</span>
           </footer>
         </main>
       </body>
