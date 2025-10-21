@@ -21,10 +21,10 @@ interface TypeDeliveryProps {
 
 export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressData, showNewAddressForm, addressesList, setShowNewAddressForm, setAddressData,setAddressSelected, handleAddressChange }: TypeDeliveryProps) {
     const streetInputRef = useRef<HTMLInputElement>(null);
+    
 
     const initAutocomplete = useCallback(async () => {
         const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-        
         // CRÍTICO: Certifica-se de que a chave API e a referência do input existem
         if (!apiKey || !streetInputRef.current) {
             console.error("API Key ou streetInputRef ausente. Autocomplete não será inicializado.");
@@ -116,7 +116,7 @@ export function TypeDelivery({ deliveryTime, handleDeliveriTymeChange, addressDa
             const selectedAddress = addressesList?.find(addr => addr.id === selectedValue);
             if (selectedAddress) {
                 setAddressData(selectedAddress);
-                setAddressSelected(selectedAddress)
+                setAddressSelected(selectedAddress);
             }
         }
     };

@@ -1,17 +1,10 @@
 "use client"
 //import { getDashboardStats } from "@/actions/dashboard/stats";
+import { fetcherGet } from "@/lib/fetcher";
 import { Clock, DollarSign, ShoppingBag, TrendingUp, Truck, Users } from "lucide-react";
 import { Fragment } from "react";
 import useSWR from 'swr';
 import { DashboardCardContent } from "./card-content";
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error('Falha ao buscar os dados do dashboard.');
-  }
-  return res.json();
-};
 
 interface DashboardStats {
   counters: {
@@ -27,7 +20,9 @@ interface DashboardStats {
 }
 
 export function CardsStats(){
-const { data, error, isLoading } = useSWR<DashboardStats>(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`, fetcher);
+const { data, error, isLoading } = useSWR<DashboardStats>(`dashboard`, fetcherGet
+  
+);
 
  // Exibir estado de carregamento
   if (isLoading) {
@@ -44,60 +39,65 @@ const { data, error, isLoading } = useSWR<DashboardStats>(`${process.env.NEXT_PU
     return <div>Nenhum dado disponível.</div>;
   }
   
-  const viewData = {
-    totalCustomers: data.counters.customers,
-    totalDeliveryPersons: 0, // Como este dado não vem do backend, permanece 0
-    totalDogsSale: data.counters.saleDogs, // Usar `saleDogs` do backend
-    queueProduction: 0, // Mantido para futuras implementações
-    ammountValue: 0, // Mantido para futuras implementações
-    queueFinished: 0, // Mantido para futuras implementações
-  };
-
+  const viewCount = {
+    vouchers: data.counters.vouchers,
+    availableVouchers: data.counters.availableVouchers,
+    customers: data.counters.customers,
+    orders: data.counters.orders,
+    sellers: data.counters.sellers,
+    usedVouchers: data.counters.usedVouchers,
+    saleDogs:data.counters.saleDogs,
+    queue: {
+      production: 0,
+      delivery:0,
+      finished:0,
+    }
+  }
 
 
     return (
         <Fragment>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                    <DashboardCardContent
-                      title="Total Clientes"
-                      value={viewData.totalCustomers}
-                      icon={Users}
-                      color="bg-blue-500"
-                      href="/clientes"
-                    />
-                    <DashboardCardContent
-                      title="Entregadores"
-                      value={viewData.totalDeliveryPersons}
-                      icon={Truck}
-                      color="bg-green-500"
-                      href="/entregadores"
-                    />
-                    <DashboardCardContent
-                      title="Pedidos Hoje"
-                      value={viewData.totalDogsSale}
-                      icon={ShoppingBag}
-                      color="bg-purple-500"
-                      href="/pedidos"
-                    />
-                    <DashboardCardContent
-                      title="Em produção"
-                      value={viewData.queueProduction}
-                      icon={Clock}
-                      color="bg-orange-500"
-                      badge="Urgente"
-                      href="/filas/production"
-                    />
-                    <DashboardCardContent
-                      title="Vendas Hoje"
-                      value={`R$ ${viewData.ammountValue.toFixed(2)}`}
-                      icon={DollarSign}
-                      color="bg-emerald-500"
-                      href="/relatorios"
-                    />
-                    <DashboardCardContent title="Entregues"
-                      value={viewData.queueFinished} 
-                      icon={TrendingUp} color="bg-indigo-500" />
-                  </div>
+            <DashboardCardContent
+              title="Total Clientes"
+              value={viewCount.customers}
+              icon={Users}
+              color="bg-blue-500"
+              href="/app/clientes"
+            />
+            <DashboardCardContent
+              title="Vendedores"
+              value={viewCount.sellers}
+              icon={Truck}
+              color="bg-green-500"
+              href="/app/vendedores"
+            />
+            <DashboardCardContent
+              title="Quantidade de Pedidos"
+              value={viewCount.saleDogs}
+              icon={ShoppingBag}
+              color="bg-purple-500"
+              href="/app/pedidos"
+            />
+            <DashboardCardContent
+              title="Fila de produção"
+              value={viewCount.queue.production}
+              icon={Clock}
+              color="bg-orange-500"
+              badge="Urgente"
+              href="/app/filas/producao"
+            />
+            <DashboardCardContent
+              title="Dogs Dendidos"
+              value={`R$ ${viewCount.saleDogs}`}
+              icon={DollarSign}
+              color="bg-emerald-500"
+              href="/app/relatorios/dogs-vendidos"
+            />
+            <DashboardCardContent title="Entregues"
+              value={viewCount.queue.finished} 
+              icon={TrendingUp} color="bg-indigo-500" />
+          </div>
         </Fragment>
     )
 }

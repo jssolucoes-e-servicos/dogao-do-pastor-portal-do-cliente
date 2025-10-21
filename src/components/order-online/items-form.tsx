@@ -3,7 +3,7 @@
 import HotDogModal from '@/components/modals/hotdog-modal';
 import { Button } from '@/components/ui/button';
 import { PRICE_PER_DOG } from '@/constants';
-import { IPreOrderItem, PreOrderFindFullResponse } from '@/interfaces';
+import { IOrderItemSend, IOrderOnline } from '@/interfaces';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -14,14 +14,14 @@ import { useEffect, useMemo, useState } from 'react';
 
 
 // Interface para o agrupamento visual no frontend (NÃO é o estado)
-interface IGroupedItem extends IPreOrderItem {
+interface IGroupedItem extends IOrderItemSend {
   quantity: number;
   groupId: string; // Chave única para o grupo (baseada na personalização)
   firstItemId: number; // ID do primeiro item do grupo para remoção
 }
 
 // Função para agrupar os itens para visualização (o truque!)
-const groupItems = (items: IPreOrderItem[]): IGroupedItem[] => {
+const groupItems = (items: IOrderItemSend[]): IGroupedItem[] => {
   const groups = new Map<string, IGroupedItem>();
 
   items.forEach((item) => {
@@ -44,10 +44,10 @@ const groupItems = (items: IPreOrderItem[]): IGroupedItem[] => {
   return Array.from(groups.values());
 };
 
-export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) {
+export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orderItems, setOrderItems] = useState<IPreOrderItem[]>([]);
+  const [orderItems, setOrderItems] = useState<IOrderItemSend[]>([]);
   const [totalValue, setTotalValue] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -61,8 +61,8 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
 
   const handleSaveCustomization = (removedIngredients: string[]) => {
     const newId = orderItems.length > 0 ? Math.max(...orderItems.map(item => item.id)) + 1 : 1;
-    setOrderItems((prev: IPreOrderItem[]): IPreOrderItem[] => {
-      const newItem: IPreOrderItem = {
+    setOrderItems((prev: IOrderItemSend[]): IOrderItemSend[] => {
+      const newItem: IOrderItemSend = {
         id: newId,
         removedIngredients,
       };
@@ -77,7 +77,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
 
     // Cria um novo item com o mesmo tipo de personalização
     const newId = orderItems.length > 0 ? Math.max(...orderItems.map(item => item.id)) + 1 : 1;
-    const newItem: IPreOrderItem = {
+    const newItem: IOrderItemSend = {
       id: newId,
       removedIngredients: groupToCopy.removedIngredients,
     };
@@ -92,17 +92,10 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
     if (!groupToDecrement || groupToDecrement.quantity <= 0) return;
 
     setOrderItems(prev => {
-      // Encontra o ÍNDICE do ÚLTIMO item que pertence a este grupo
-      // O `.findLastIndex` é ideal, mas pode não estar disponível em todos os runtimes Node.js.
-      // Usamos uma iteração reversa para garantir que removemos o último adicionado.
-      
       let indexToRemove = -1;
-      // Reverse loop para encontrar o último item deste tipo
       for(let i = prev.length - 1; i >= 0; i--) {
         const currentItem = prev[i];
-        // Cria a chave para comparação
         const currentKey = currentItem.removedIngredients.sort().join('|');
-
         if (currentKey === groupId) {
           indexToRemove = i;
           break;
@@ -111,24 +104,16 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
 
       if (indexToRemove === -1) return prev; // Não encontrado
 
-      // Remove o item do array
       return prev.filter((_, index) => index !== indexToRemove);
     });
   };
 
-  // Manteremos esta função para remover *um* item pelo ID gerado pelo modal (caso você precise dela)
-  // const handleRemoveItem = (id: number) => {
-  //   setOrderItems(orderItems.filter(item => item.id !== id));
-  // };
-
-  // Remove TODOS os itens de um determinado grupo
   const handleRemoveGroup = (groupId: string) => {
     setOrderItems(prev => prev.filter(item => {
       const itemKey = item.removedIngredients.sort().join('|');
       return itemKey !== groupId;
     }));
   };
-
 
   const handleProccessItems = async () => {
     setIsLoading(true);
@@ -140,25 +125,21 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
         },
         body: JSON.stringify({ orderOnlineId: preorder.id, orderItems: orderItems }),
       });
-      //const data = await response.json();
-      //console.log('data:', data);
       if (!response.ok) {
         setIsLoading(false);
         toast.error('Falha ao gravar items, tente novamente.');
-        //router.push("/off-line");
       } else {
-        setIsLoading(false);
         router.push(`/comprar/${preorder.id}/endereco`);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
       toast.error('Ocorreu um erro ao buscar seus dados. Tente novamente.');
-    } finally {
-      setIsLoading(false);
+       setIsLoading(false);
     }
   }
 
-   return (
+  return (
     <div className="flex flex-col gap-6 p-4 rounded-lg bg-white shadow-lg w-full">
       <h2 className="text-2xl font-bold text-center">Meus Dogões</h2>
 
@@ -191,7 +172,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
                     size="icon" 
                     className="h-8 w-8 text-gray-700"
                     onClick={() => handleDecrement(item.groupId)} // Decrementa
-                    disabled={item.quantity <= 1}
+                    disabled={item.quantity <= 1 || isLoading}
                   >
                     -
                   </Button>
@@ -203,13 +184,14 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
                     size="icon" 
                     className="h-8 w-8 text-green-600"
                     onClick={() => handleIncrement(item.groupId)} // Incrementa
+                    disabled={isLoading}
                   >
                     +
                   </Button>
                 </div>
                 
                 {/* Botão de Lixo para remover o grupo todo */}
-                <Button variant="ghost" size="icon" onClick={() => handleRemoveGroup(item.groupId)}>
+                <Button variant="ghost" size="icon" onClick={() => handleRemoveGroup(item.groupId)} disabled={isLoading}>
                   <Trash2 className="size-5 text-red-500" />
                 </Button>
               </div>
@@ -219,7 +201,7 @@ export function ItemsForm({ preorder }: { preorder: PreOrderFindFullResponse }) 
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto bg-green-600 hover:bg-green-700" disabled={isLoading}>
           <PlusCircle className="mr-2" />
           {orderItems.length === 0 ? 'Adicionar Dogão' : 'Adicionar outro Dogão'}
         </Button>

@@ -1,8 +1,8 @@
-import { PreOrderFindFullResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import { Fragment } from "react";
 
 interface AnalysisPreOrderProps {
-  preorder: PreOrderFindFullResponse;
+  preorder: IOrderOnline;
 }
 
 export async function AnalysisPreOrder({ preorder }: AnalysisPreOrderProps) {

@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 // Subcomponentes
-import { PreOrderFindFullResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import { formatCurrency } from "@/lib/formats";
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
@@ -11,12 +11,13 @@ import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 
-export function PaymentsForm({ preorder }: { preorder: PreOrderFindFullResponse }) {
+export function PaymentsForm({ preorder }: { preorder: IOrderOnline }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setStep = async (step:string) => {
     try {
+      setIsLoading(true);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order-online/change-step`, {
         method: 'POST',
         headers: {
@@ -25,17 +26,17 @@ export function PaymentsForm({ preorder }: { preorder: PreOrderFindFullResponse 
         body: JSON.stringify({ preorderId: preorder.id, step: step }),
       });
       if (!response.ok) {
-        setIsLoading(false);
+        
         toast.error('Falha ao processar esta opção, tente novamente.');
-        //router.push("/off-line");
-      } else {
         setIsLoading(false);
+      } else {
+        
         router.push(`/comprar/${preorder.id}/pagamento/${step}`);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
       toast.error('Ocorreu um erro ao defiir opção pagamento. Tente novamente.');
-    } finally {
       setIsLoading(false);
     }
   }

@@ -5,9 +5,8 @@ import type { Metadata } from "next"
 import type React from "react"
 
 export const metadata: Metadata = {
-  title: "CRM System",
-  description: "Sistema de CRM para gestão de clientes",
-  generator: "v0.app",
+  title: "Dogão do Pastor - ERP",
+  description: "Sistema ERP - Gestão de Lancerias",
 }
 
 export default function RootLayout({
@@ -16,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+    <html lang="pt-BR" className="dark" suppressHydrationWarning suppressContentEditableWarning>
+      <body className="min-h-screen bg-background text-foreground">
         <AuthProvider>
           {children}
           <Toaster richColors position="bottom-right" />

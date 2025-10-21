@@ -1,6 +1,6 @@
-import { findPreInitialOrder, findPreOrder } from "@/actions/pre-orders/find";
+import { findOrderOnline } from "@/actions/order-online/find";
 import { OrderStatsEnum, PreOrderStepEnum } from "@/enums";
-import { PreOrderFindFullResponse, PreOrderFindInitialResponse } from "@/interfaces";
+import { IOrderOnline } from "@/interfaces";
 import { redirect } from "next/navigation";
 
 interface RedirectStepsHelperProps {
@@ -8,19 +8,13 @@ interface RedirectStepsHelperProps {
   page: string;
 }
 
-export async function RedirectStepsHelper({presaleId, page}: RedirectStepsHelperProps): Promise<PreOrderFindFullResponse> {
-  const preorder = await findPreOrder(presaleId) ;
+export async function RedirectStepsHelper({presaleId, page}: RedirectStepsHelperProps): Promise<IOrderOnline> {
+  const preorder = await findOrderOnline(presaleId) ;
   if (!preorder) { redirect('/off-line')};
   processRedirects(presaleId,preorder.status,preorder.step, page);
   return preorder
 } 
 
-export async function RedirectInitialStepsHelper({presaleId, page}: RedirectStepsHelperProps):Promise<PreOrderFindInitialResponse> {
-  const preorder =   await findPreInitialOrder(presaleId);
-  if (!preorder) { redirect('/off-line')};
-  processRedirects(presaleId,preorder.status,preorder.step, page);
-  return preorder
-}
 
 function processRedirects(presaleId:string,status:string,step:string, page:string){
   if (status === OrderStatsEnum.digitation){

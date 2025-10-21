@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { VERSION } from "@/constants";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -54,7 +55,8 @@ export default function RootLayout({
                   <span className="hover:text-gray-700">Igreja Viva em Células</span>
                 </span>
               </a>
-            </div>
+            </div> 
+            <span className="hover:text-gray-700">{VERSION}</span>
           </footer>
         </main>
       </body>
