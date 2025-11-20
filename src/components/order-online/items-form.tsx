@@ -1,4 +1,4 @@
-// components/pre-sale/steps/order-details-step.tsx
+// src/components/order-online/items-form.tsx
 'use client';
 import HotDogModal from '@/components/modals/hotdog-modal';
 import { Button } from '@/components/ui/button';
@@ -93,7 +93,7 @@ export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
 
     setOrderItems(prev => {
       let indexToRemove = -1;
-      for(let i = prev.length - 1; i >= 0; i--) {
+      for (let i = prev.length - 1; i >= 0; i--) {
         const currentItem = prev[i];
         const currentKey = currentItem.removedIngredients.sort().join('|');
         if (currentKey === groupId) {
@@ -135,7 +135,7 @@ export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
     } catch (error) {
       console.error('Erro na requisição:', error);
       toast.error('Ocorreu um erro ao buscar seus dados. Tente novamente.');
-       setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -150,7 +150,7 @@ export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
           </div>
         ) : (
           // Usamos groupedItems (a lista para visualização) para renderizar
-          groupedItems.map(item => ( 
+          groupedItems.map(item => (
             <div key={item.groupId} className="flex items-center justify-between p-4 border rounded-md">
               <div className="flex items-center space-x-4">
                 <Image src="/assets/images/hot-dog.svg" alt="Hot Dog" width={50} height={50} />
@@ -165,23 +165,23 @@ export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
               {/* Controle de Quantidade */}
               <div className="flex items-center space-x-4 pl-2">
                 <span className="font-semibold hidden sm:inline">{formatCurrency(PRICE_PER_DOG)}</span>
-                
+
                 <div className="flex items-center border rounded-md">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8 text-gray-700"
                     onClick={() => handleDecrement(item.groupId)} // Decrementa
                     disabled={item.quantity <= 1 || isLoading}
                   >
                     -
                   </Button>
-                  
+
                   <span className="w-8 text-center font-bold">{item.quantity}</span>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8 text-green-600"
                     onClick={() => handleIncrement(item.groupId)} // Incrementa
                     disabled={isLoading}
@@ -189,7 +189,7 @@ export function ItemsForm({ preorder }: { preorder: IOrderOnline }) {
                     +
                   </Button>
                 </div>
-                
+
                 {/* Botão de Lixo para remover o grupo todo */}
                 <Button variant="ghost" size="icon" onClick={() => handleRemoveGroup(item.groupId)} disabled={isLoading}>
                   <Trash2 className="size-5 text-red-500" />
